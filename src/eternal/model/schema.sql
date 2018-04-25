@@ -1,0 +1,26 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE DATABASE eternal WITH ENCODING=UTF8;
+
+-- 密码加密类型
+CREATE TYPE PasswordType AS enum('MD5','SHA1');
+-- 账号
+CREATE TABLE "account"(
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
+  country_code VARCHAR(8) NOT NULL DEFAULT '86',
+  mobile VARCHAR(32) NOT NULL,
+  salt VARCHAR(32) NOT NULL,
+  passwd VARCHAR(256) NOT NULL,
+  ptype PasswordType NOT NULL,
+  utime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(country_code, mobile)
+);
+
+-- Token
+CREATE TABLE token(
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
+  user_id UUID NOT NULL,
+  ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id)
+);
