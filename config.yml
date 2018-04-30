@@ -1,4 +1,13 @@
 
+http:
+  addr: :1323
+  cors:
+    origins:
+     - "http://127.0.0.1:4200"
+     - "http://localhost:4200"
+  session:
+    secret: xGKCAxcCbUZyM3GayitHcQJz9HHnDNKk
+
 log:
   format: json
   level: debug

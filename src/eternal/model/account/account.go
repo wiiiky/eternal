@@ -8,8 +8,54 @@ import (
 	"time"
 )
 
-func Create(countryCode, mobile, password, ptype string) (*Account, error) {
+func GetSupportedCountries() ([]*SupportedCounty, error) {
 	conn := db.Conn()
+
+	countries := make([]*SupportedCounty, 0)
+	err := conn.Model(&countries).Order(`sort ASC`).Select()
+	if err != nil {
+		log.Error("SQL Error:", err)
+		return nil, err
+	}
+	return countries, nil
+}
+
+func GetSupportedCountryWithCode(code string) (*SupportedCounty, error) {
+	conn := db.Conn()
+	country := &SupportedCounty{
+		Code: code,
+	}
+
+	err := conn.Select(country)
+	if err == pg.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	return country, nil
+}
+
+func CreateAccount(countryCode, mobile, password, ptype string) (*Account, error) {
+	conn := db.Conn()
+
+	tx, err := conn.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	a := &Account{
+		CountryCode: countryCode,
+		Mobile:      mobile,
+	}
+	err = tx.Model(a).Where(`country_code=? AND mobile=?`, countryCode, mobile).Select()
+	if err != nil {
+		if err != pg.ErrNoRows {
+			return nil, err
+		}
+	} else { /* 查询成功，手机号已存在 */
+		return nil, db.ErrKeyDuplicate
+	}
 
 	salt, err := util.RandString(12)
 	if err != nil {
@@ -18,23 +64,22 @@ func Create(countryCode, mobile, password, ptype string) (*Account, error) {
 	}
 
 	password, ptype = encryptPassword(salt, password, ptype)
-
-	a := &Account{
-		CountryCode: countryCode,
-		Mobile:      mobile,
-		Salt:        salt,
-		Password:    password,
-		PType:       ptype,
-	}
-	if err := conn.Insert(a); err != nil {
+	a.Salt = salt
+	a.Password = password
+	a.PType = ptype
+	if err := tx.Insert(a); err != nil {
 		log.Error("SQL Error: ", err)
+		return nil, err
+	}
+	if err := tx.Commit(); err != nil {
+		log.Error("SQL Commit failed:", err)
 		return nil, err
 	}
 	log.Infof("User %s:%s created", countryCode, mobile)
 	return a, nil
 }
 
-func GetWithMobile(countryCode, mobile string) (*Account, error) {
+func GetAccountWithMobile(countryCode, mobile string) (*Account, error) {
 	conn := db.Conn()
 
 	a := &Account{}
@@ -48,7 +93,7 @@ func GetWithMobile(countryCode, mobile string) (*Account, error) {
 	return a, err
 }
 
-func GetWithUserID(userID string) (*Account, error) {
+func GetAccountWithUserID(userID string) (*Account, error) {
 	conn := db.Conn()
 
 	a := &Account{}
@@ -62,7 +107,7 @@ func GetWithUserID(userID string) (*Account, error) {
 	return a, err
 }
 
-func GetWithTokenID(tokenID string) (*Account, error) {
+func GetAccountWithTokenID(tokenID string) (*Account, error) {
 	conn := db.Conn()
 
 	a := &Account{}

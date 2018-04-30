@@ -32,7 +32,7 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		if !ok {
 			return c.NoContent(http.StatusUnauthorized)
 		}
-		account, _ := account.GetWithTokenID(tokenID)
+		account, _ := account.GetAccountWithTokenID(tokenID)
 		if account == nil {
 			return c.NoContent(http.StatusUnauthorized)
 		}

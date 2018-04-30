@@ -2,6 +2,17 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE DATABASE eternal WITH ENCODING=UTF8;
 
+
+CREATE TABLE supported_country(
+  code VARCHAR(8) NOT NULL PRIMARY KEY,
+  name VARCHAR(64) NOT NULL,
+  sort INT NOT NULL
+);
+
+CREATE INDEX supported_country_sort ON supported_country (sort);
+
+INSERT INTO supported_country(code,name,sort) VALUES('86','中国',0),('1','美国',1),('81','日本',2);
+
 -- 密码加密类型
 CREATE TYPE PasswordType AS enum('MD5','SHA1');
 -- 账号

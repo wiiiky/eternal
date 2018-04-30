@@ -20,23 +20,14 @@ func main() {
 	initConfig()
 	initLogging()
 	initDatabase()
+	initEcho(func(e *echo.Echo) {
+		e.PUT("/login", view.Login)
+		e.POST("/account", view.Signup)
+		e.GET("/supported_countries", view.GetSupportedCountries)
 
-	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://127.0.0.1:1323"},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	}))
-	e.Use(session.Middleware(sessions.NewCookieStore([]byte("xGKCAxcCbUZyM3GayitHcQJz9HHnDNKk"))))
-	e.Use(cmiddleware.AuthMiddleware)
-	e.HTTPErrorHandler = errorHandler
-
-	e.PUT("/login", view.Login)
-	e.PUT("/signup", view.Signup)
-	e.GET("/user", view.GetAccountInfo)
-
-	e.Logger.Fatal(e.Start(":1323"))
+		g := e.Group("", cmiddleware.AuthMiddleware)
+		g.GET("/account/info", view.GetAccountInfo)
+	})
 }
 
 func errorHandler(err error, c echo.Context) {
@@ -45,7 +36,7 @@ func errorHandler(err error, c echo.Context) {
 	} else if e, ok := err.(*echo.HTTPError); ok {
 		c.JSON(e.Code, view.NewError(0, -1, e.Message))
 	} else {
-		c.JSON(http.StatusInternalServerError, view.NewError(0, -1, e.Error()))
+		c.JSON(http.StatusInternalServerError, view.NewError(0, -1, err.Error()))
 	}
 }
 
@@ -81,4 +72,38 @@ func initDatabase() {
 	if err := db.Start(dbURL); err != nil {
 		log.Fatal("Connecting database failed:", err)
 	}
+}
+
+func initEcho(f func(*echo.Echo)) {
+	httpAddr := viper.GetString("http.addr")
+	allowOrigins := viper.GetStringSlice("http.cors.origins")
+	sessionSecret := viper.GetString("http.session.secret")
+	log.Debugf("http.addr:%s", httpAddr)
+	log.Debugf("http.cors.origins:%s", allowOrigins)
+	log.Debugf("http.session.secret:%s", sessionSecret)
+	if httpAddr == "" {
+		log.Fatal("Incomplete config. http.addr not found")
+	}
+	if len(allowOrigins) == 0 {
+		log.Fatal("Incomplete config. http.cors.origins not found")
+	}
+	if sessionSecret == "" {
+		log.Fatal("Incomplete config. http.session.secret not found")
+	}
+
+	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     allowOrigins,
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowCredentials: true,
+		AllowMethods:     []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+	}))
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte(sessionSecret))))
+	e.HTTPErrorHandler = errorHandler
+
+	f(e)
+
+	e.Logger.Fatal(e.Start(httpAddr))
 }

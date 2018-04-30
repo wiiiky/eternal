@@ -7,10 +7,12 @@ import (
 
 /* 这里的错误全部都是对客户端的 */
 var (
-	E_USER_NOT_FOUND               = NewError(http.StatusNotFound, 100, "用户不存在")
-	E_USER_PASSWORD_INVALID        = NewError(http.StatusBadRequest, 101, "用户密码错误")
-	E_USER_PASSWORD_LENGTH_INVALID = NewError(http.StatusBadRequest, 102, "账号密码长度过短或过长")
-	E_USER_SMS_CODE_INVALID        = NewError(http.StatusBadRequest, 103, "短信验证码错误")
+	ErrUserNotFound              = NewError(http.StatusNotFound, 100, "用户不存在")
+	ErrUserPasswordInvalid       = NewError(http.StatusBadRequest, 101, "用户密码错误")
+	ErrUserPasswordLengthInvalid = NewError(http.StatusBadRequest, 102, "账号密码长度过短或过长")
+	ErrUseSMSCodeInvalid         = NewError(http.StatusBadRequest, 103, "短信验证码错误")
+	ErrMobileExisted             = NewError(http.StatusBadRequest, 104, "用户已存在")
+	ErrCountryCodeInvalid        = NewError(http.StatusBadRequest, 105, "国家不支持")
 )
 
 func NewError(status, code int, msg interface{}) error {

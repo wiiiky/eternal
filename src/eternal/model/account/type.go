@@ -10,6 +10,12 @@ const (
 	PTYPE_SHA256 = "SHA256"
 )
 
+type SupportedCounty struct {
+	TableName struct{} `sql:"supported_country" json:"-"`
+	Code      string   `sql:"code,pk" json:"code"`
+	Name      string   `sql:"name" json:"name"`
+}
+
 type Account struct {
 	TableName   struct{}  `sql:"account" json:"-"`
 	ID          string    `sql:"id" json:"id"`
