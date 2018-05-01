@@ -27,6 +27,7 @@ func main() {
 
 		g := e.Group("", cmiddleware.AuthMiddleware)
 		g.GET("/account/info", view.GetAccountInfo)
+		g.GET("/user/profile", view.GetUserProfile)
 	})
 }
 
@@ -75,17 +76,28 @@ func initDatabase() {
 }
 
 func initEcho(f func(*echo.Echo)) {
+	viper.SetDefault("http.cors.methods", []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE})
+	viper.SetDefault("http.cors.origins", []string{"*"})
+	viper.SetDefault("http.cors.credentials", false)
+
 	httpAddr := viper.GetString("http.addr")
 	allowOrigins := viper.GetStringSlice("http.cors.origins")
+	allowMethods := viper.GetStringSlice("http.cors.methods")
+	allowCredentials := viper.GetBool("http.cors.credentials")
 	sessionSecret := viper.GetString("http.session.secret")
 	log.Debugf("http.addr:%s", httpAddr)
 	log.Debugf("http.cors.origins:%s", allowOrigins)
+	log.Debugf("http.cors.methods:%s", allowMethods)
+	log.Debugf("http.cors.credentials:%v", allowCredentials)
 	log.Debugf("http.session.secret:%s", sessionSecret)
 	if httpAddr == "" {
 		log.Fatal("Incomplete config. http.addr not found")
 	}
 	if len(allowOrigins) == 0 {
 		log.Fatal("Incomplete config. http.cors.origins not found")
+	}
+	if len(allowMethods) == 0 {
+		log.Fatal("Incomplete config. http.cors.methods not found")
 	}
 	if sessionSecret == "" {
 		log.Fatal("Incomplete config. http.session.secret not found")
@@ -97,8 +109,8 @@ func initEcho(f func(*echo.Echo)) {
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     allowOrigins,
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-		AllowCredentials: true,
-		AllowMethods:     []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+		AllowCredentials: allowCredentials,
+		AllowMethods:     allowMethods,
 	}))
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(sessionSecret))))
 	e.HTTPErrorHandler = errorHandler

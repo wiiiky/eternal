@@ -35,6 +35,7 @@ func GetSupportedCountryWithCode(code string) (*SupportedCounty, error) {
 	return country, nil
 }
 
+/* 创建帐号 */
 func CreateAccount(countryCode, mobile, password, ptype string) (*Account, error) {
 	conn := db.Conn()
 
@@ -48,7 +49,7 @@ func CreateAccount(countryCode, mobile, password, ptype string) (*Account, error
 		CountryCode: countryCode,
 		Mobile:      mobile,
 	}
-	err = tx.Model(a).Where(`country_code=? AND mobile=?`, countryCode, mobile).Select()
+	err = tx.Model(a).Where(`mobile=?`, mobile).Select()
 	if err != nil {
 		if err != pg.ErrNoRows {
 			return nil, err
@@ -68,9 +69,18 @@ func CreateAccount(countryCode, mobile, password, ptype string) (*Account, error
 	a.Password = password
 	a.PType = ptype
 	if err := tx.Insert(a); err != nil {
-		log.Error("SQL Error: ", err)
+		log.Error("SQL Error:", err)
 		return nil, err
 	}
+
+	up := &UserProfile{
+		UserID: a.ID,
+	}
+	if err := tx.Insert(up); err != nil {
+		log.Error("SQL Error:", err)
+		return nil, err
+	}
+
 	if err := tx.Commit(); err != nil {
 		log.Error("SQL Commit failed:", err)
 		return nil, err
@@ -79,11 +89,11 @@ func CreateAccount(countryCode, mobile, password, ptype string) (*Account, error
 	return a, nil
 }
 
-func GetAccountWithMobile(countryCode, mobile string) (*Account, error) {
+func GetAccountWithMobile(mobile string) (*Account, error) {
 	conn := db.Conn()
 
 	a := &Account{}
-	err := conn.Model(a).Where("country_code = ?", countryCode).Where("mobile = ?", mobile).Select()
+	err := conn.Model(a).Where("mobile = ?", mobile).Select()
 	if err == pg.ErrNoRows {
 		return nil, nil
 	} else if err != nil {

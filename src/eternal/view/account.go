@@ -47,11 +47,10 @@ func Login(ctx echo.Context) error {
 	if err := ctx.Bind(&data); err != nil {
 		return err
 	}
-	countryCode := data.CountryCode
 	mobile := data.Mobile
 	password := data.Password
 
-	a, err := account.GetAccountWithMobile(countryCode, mobile)
+	a, err := account.GetAccountWithMobile(mobile)
 	if err != nil {
 		return err
 	} else if a == nil { /* 用户不存在 */
@@ -60,7 +59,7 @@ func Login(ctx echo.Context) error {
 	if !a.Auth(password) { /* 密码错误 */
 		return ErrUserPasswordInvalid
 	}
-	log.Debugf("User %s:%s logged in", countryCode, mobile)
+	log.Debugf("User %s logged in", mobile)
 
 	return login(ctx, a)
 }

@@ -39,3 +39,13 @@ type Token struct {
 	UserID    string    `sql:"user_id" json:"user_id"`
 	CTime     time.Time `sql:"ctime" json:"ctime"`
 }
+
+type UserProfile struct {
+	TableName struct{}  `sql:"user_profile" json:"-"`
+	UserID    string    `sql:"user_id,pk" json:"user_id"`
+	Name      string    `sql:"name" json:"name"`
+	Gender    string    `sql:"gender" json:"gender"`
+	Birthday  time.Time `sql:"birthday" json:"birthday"`
+	UTime     time.Time `sql:"utime,null" json:"utime"`
+	CTime     time.Time `sql:"ctime,null" json:"ctime"`
+}
