@@ -59,8 +59,24 @@ CREATE TABLE question (
 
 CREATE TABLE answer (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
-  content TEXT NOT NULL, -- 回答
+  content TEXT NOT NULL, -- 回答正文
   user_id UUID NOT NULL,
+  like_count INT NOT NULL DEFAULT 0,
+  dislike_count INT NOT NULL DEFAULT 0,
   utime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE answer_like(
+  user_id UUID NOT NULL,
+  answer_id UUID NOT NULL,
+  ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(user_id, answer_id)
+);
+
+CREATE TABLE answer_dislike(
+  user_id UUID NOT NULL,
+  answer_id UUID NOT NULL,
+  ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(user_id, answer_id)
 );
