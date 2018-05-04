@@ -21,12 +21,12 @@ func main() {
 	initLogging()
 	initDatabase()
 	initEcho(func(e *echo.Echo) {
-		e.PUT("/login", view.Login)
+		e.PUT("/account", view.Login)
 		e.POST("/account", view.Signup)
 		e.GET("/supported_countries", view.GetSupportedCountries)
 
 		g := e.Group("", cmiddleware.AuthMiddleware)
-		g.GET("/account/info", view.GetAccountInfo)
+		g.GET("/account", view.GetAccountInfo)
 		g.GET("/user/profile", view.GetUserProfile)
 	})
 }
