@@ -1,8 +1,8 @@
 package question
 
 import (
-	"time"
 	"eternal/model/account"
+	"time"
 )
 
 type Topic struct {
@@ -15,14 +15,14 @@ type Topic struct {
 }
 
 type Question struct {
-	TableName   struct{}  `sql:"question" json:"-"`
-	ID          string    `sql:"id", json:"id"`
-	Title       string    `sql:"title" json:"title"`
-	Description string    `sql:"description" json:"description"`
-	UserID      string    `sql:"user_id" json:"-"`
-	UTime       time.Time `sql:"utime,null" json:"utime"`
-	CTime       time.Time `sql:"ctime,null" json:"ctime"`
-	Topics       []*Topic    `pg:"many2many:question_topic,fk:qid,joinFK:tid" json:"topics"`
+	TableName   struct{}             `sql:"question" json:"-"`
+	ID          string               `sql:"id", json:"id"`
+	Title       string               `sql:"title" json:"title"`
+	Description string               `sql:"description" json:"description"`
+	UserID      string               `sql:"user_id" json:"-"`
+	UTime       time.Time            `sql:"utime,null" json:"utime"`
+	CTime       time.Time            `sql:"ctime,null" json:"ctime"`
+	Topics      []*Topic             `pg:"many2many:question_topic,fk:qid,joinFK:tid" json:"topics"`
 	User        *account.UserProfile `sql:"-" json:"user"`
 }
 

@@ -41,12 +41,12 @@ type Token struct {
 }
 
 type UserProfile struct {
-	TableName struct{}  `sql:"user_profile" json:"-"`
-	UserID    string    `sql:"user_id,pk" json:"user_id"`
-	Name      string    `sql:"name" json:"name"`
-	Gender    string    `sql:"gender" json:"gender"`
-	Description string  `sql:"description" json:"description"`
-	Birthday  time.Time `sql:"birthday" json:"birthday"`
-	UTime     time.Time `sql:"utime,null" json:"utime"`
-	CTime     time.Time `sql:"ctime,null" json:"ctime"`
+	TableName   struct{}  `sql:"user_profile" json:"-"`
+	UserID      string    `sql:"user_id,pk" json:"user_id"`
+	Name        string    `sql:"name" json:"name"`
+	Gender      string    `sql:"gender" json:"gender"`
+	Description string    `sql:"description" json:"description"`
+	Birthday    time.Time `sql:"birthday" json:"birthday"`
+	UTime       time.Time `sql:"utime,null" json:"utime"`
+	CTime       time.Time `sql:"ctime,null" json:"ctime"`
 }
