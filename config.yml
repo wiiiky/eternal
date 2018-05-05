@@ -1,4 +1,6 @@
 
+debug: true
+
 http:
   addr: :1323
   cors:

@@ -30,6 +30,7 @@ func GetSupportedCountryWithCode(code string) (*SupportedCounty, error) {
 	if err == pg.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
+		log.Error("SQL Error:", err)
 		return nil, err
 	}
 	return country, nil

@@ -21,13 +21,15 @@ func main() {
 	initLogging()
 	initDatabase()
 	initEcho(func(e *echo.Echo) {
-		e.PUT("/account", view.Login)
-		e.POST("/account", view.Signup)
-		e.GET("/supported_countries", view.GetSupportedCountries)
+		api := e.Group("/api")
+		api.PUT("/account", view.Login)
+		api.POST("/account", view.Signup)
+		api.GET("/supported_countries", view.GetSupportedCountries)
 
-		g := e.Group("", cmiddleware.AuthMiddleware)
-		g.GET("/account", view.GetAccountInfo)
-		g.GET("/user/profile", view.GetUserProfile)
+		authApi := api.Group("", cmiddleware.AuthMiddleware)
+		authApi.GET("/account", view.GetAccountInfo)
+		authApi.GET("/user/profile", view.GetUserProfile)
+		authApi.GET("/questions", view.FindQuestions)
 	})
 }
 
@@ -53,6 +55,7 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err != nil { // Handle errors reading the config file
 		panic(err)
 	}
+	viper.SetDefault("debug", true)
 }
 
 /*
