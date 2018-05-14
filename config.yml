@@ -12,7 +12,7 @@ http:
     secret: xGKCAxcCbUZyM3GayitHcQJz9HHnDNKk
 
 log:
-  format: json
+  format: text
   level: debug
   output: stdout
 

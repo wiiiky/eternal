@@ -30,6 +30,11 @@ func main() {
 		authApi.GET("/account", view.GetAccountInfo)
 		authApi.GET("/user/profile", view.GetUserProfile)
 		authApi.GET("/questions", view.FindQuestions)
+		authApi.POST("/answer/:id/like", view.AddAnswerLike)
+		// authAPI.DELETE("/answer/:id/like", view.DeleteAnswerLike)
+		authApi.POST("/answer/:id/dislike", view.AddAnswerDislike)
+		// authAPI.DELETE("/answer/:id/dislike", view.DeleteAnswerDislike)
+		authApi.GET("/hot/questions", view.FindHotQuestions)
 	})
 }
 

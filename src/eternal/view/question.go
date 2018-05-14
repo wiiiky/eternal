@@ -15,3 +15,8 @@ func FindQuestions(ctx echo.Context) error {
 	}
 	return ctx.JSON(http.StatusOK, questions)
 }
+
+/* 获取热门问题 */
+func FindHotQuestions(ctx echo.Context) error {
+	return nil
+}

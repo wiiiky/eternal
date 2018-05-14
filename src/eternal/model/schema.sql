@@ -79,9 +79,8 @@ CREATE TABLE question_topic(
 CREATE TABLE answer (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
   content TEXT NOT NULL, -- 回答正文
+  question_id UUID NOT NULL, -- 问题ID
   user_id UUID NOT NULL,
-  like_count INT NOT NULL DEFAULT 0,
-  dislike_count INT NOT NULL DEFAULT 0,
   utime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -98,4 +97,23 @@ CREATE TABLE answer_dislike(
   answer_id UUID NOT NULL,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY(user_id, answer_id)
+);
+
+-- 问题统计
+CREATE TABLE question_stat(
+  question_id UUID NOT NULL, -- 问题ID
+  view_count INTEGER NOT NULL DEFAULT 0, -- view count 查看数 一个用户只会计一次
+  answer_count INTEGER NOT NULL DEFAULT 0, -- answer count 回答数
+  answer_index FLOAT NOT NULL DEFAULT 0, -- 回答指数，在特定时间内收获的回答数
+  PRIMARY KEY (question_id)
+);
+
+-- 回答统计
+CREATE TABLE answer_stat(
+  answer_id UUID NOT NULL, -- 回答ID
+  view_count INTEGER NOT NULL DEFAULT 0, -- view count 查看数 一个用户只会计一次
+  like_count INTEGER NOT NULL DEFAULT 0, -- like count 喜欢数
+  dislike_count INTEGER NOT NULL DEFAULT 0, -- dislike count 不喜欢数
+  like_index FLOAT NOT NULL DEFAULT 0,  -- 喜欢指数，在特定时间内收获的点赞数
+  PRIMARY KEY(answer_id)
 );
