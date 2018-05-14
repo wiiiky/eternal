@@ -22,11 +22,12 @@ func main() {
 	initDatabase()
 	initEcho(func(e *echo.Echo) {
 		api := e.Group("/api")
-		api.PUT("/account", view.Login)
+		api.PUT("/account/token", view.Login)
 		api.POST("/account", view.Signup)
 		api.GET("/supported_countries", view.GetSupportedCountries)
 
 		authApi := api.Group("", cmiddleware.AuthMiddleware)
+		authApi.DELETE("/account/token", view.Logout)
 		authApi.GET("/account", view.GetAccountInfo)
 		authApi.GET("/user/profile", view.GetUserProfile)
 		authApi.GET("/questions", view.FindQuestions)

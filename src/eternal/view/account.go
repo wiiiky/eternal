@@ -64,6 +64,19 @@ func Login(ctx echo.Context) error {
 	return login(ctx, a)
 }
 
+func Logout(ctx echo.Context) error {
+	a := ctx.Get("account").(*account.Account)
+
+	if err := account.DeleteToken(a.ID); err != nil {
+		return err
+	}
+
+	sess, _ := session.Get("session", ctx)
+	sess.Values["token"] = ""
+	sess.Save(ctx.Request(), ctx.Response())
+	return ctx.NoContent(http.StatusOK)
+}
+
 type iSignup struct {
 	iLogin
 	Code string `json:"code" form:"code" query:"code"`
