@@ -22,14 +22,21 @@ func main() {
 	initDatabase()
 	initEcho(func(e *echo.Echo) {
 		api := e.Group("/api")
+		// 登录
 		api.PUT("/account/token", view.Login)
+		// 注册
 		api.POST("/account", view.Signup)
+		// 获取支持的国家列表
 		api.GET("/supported_countries", view.GetSupportedCountries)
 
 		authApi := api.Group("", cmiddleware.AuthMiddleware)
+		// 注册
 		authApi.DELETE("/account/token", view.Logout)
+		// 获取账号信息
 		authApi.GET("/account", view.GetAccountInfo)
+		// 获取用户信息
 		authApi.GET("/user/profile", view.GetUserProfile)
+		// 获取问题列表
 		authApi.GET("/questions", view.FindQuestions)
 		authApi.POST("/answer/:id/like", view.AddAnswerLike)
 		// authAPI.DELETE("/answer/:id/like", view.DeleteAnswerLike)
