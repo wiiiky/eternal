@@ -35,9 +35,6 @@ func AddAnswerLike(userID, answerID string) error {
 		UserID:   userID,
 		AnswerID: answerID,
 	}
-	answerStat := AnswerStat{
-		AnswerID: answerID,
-	}
 
 	if err := tx.Select(&like); err == nil { /* “喜欢“标签已经存在 */
 		return nil
@@ -51,7 +48,7 @@ func AddAnswerLike(userID, answerID string) error {
 			log.Error("SQL Error", err)
 			return err
 		}
-		if _, err := tx.Model(&answerStat).Set("dislike_count = dislike_count - 1").Where("answer_id=?answer_id").Update(); err != nil {
+		if _, err := tx.Model(&answer).Set("dislike_count = dislike_count - 1").Where("id=?id").Update(); err != nil {
 			log.Error("SQL Error", err)
 			return err
 		}
@@ -65,7 +62,7 @@ func AddAnswerLike(userID, answerID string) error {
 		return err
 	}
 
-	if _, err := tx.Model(&answerStat).Set("like_count = like_count + 1").Where("answer_id=?answer_id").Update(); err != nil {
+	if _, err := tx.Model(&answer).Set("like_count = like_count + 1").Where("id=?id").Update(); err != nil {
 		log.Error("SQL Error", err)
 		return err
 	}
@@ -106,9 +103,6 @@ func AddAnswerDislike(userID, answerID string) error {
 		UserID:   userID,
 		AnswerID: answerID,
 	}
-	answerStat := AnswerStat{
-		AnswerID: answerID,
-	}
 
 	if err := tx.Select(&dislike); err == nil { /* “不喜欢“标签已经存在 */
 		return nil
@@ -122,7 +116,7 @@ func AddAnswerDislike(userID, answerID string) error {
 			log.Error("SQL Error", err)
 			return err
 		}
-		if _, err := tx.Model(&answerStat).Set("like_count = like_count - 1").Where("answer_id=?answer_id").Update(); err != nil {
+		if _, err := tx.Model(&answer).Set("like_count = like_count - 1").Where("id=?id").Update(); err != nil {
 			log.Error("SQL Error", err)
 			return err
 		}
@@ -136,7 +130,7 @@ func AddAnswerDislike(userID, answerID string) error {
 		return err
 	}
 
-	if _, err := tx.Model(&answerStat).Set("dislike_count = dislike_count + 1").Where("answer_id=?answer_id").Update(); err != nil {
+	if _, err := tx.Model(&answer).Set("dislike_count = dislike_count + 1").Where("id=?id").Update(); err != nil {
 		log.Error("SQL Error", err)
 		return err
 	}

@@ -37,12 +37,12 @@ CREATE TABLE token(
 );
 
 -- 性别
-CREATE TYPE GenderType AS enum('MALE', 'FEMALE');
+CREATE TYPE GenderType AS enum('MALE', 'FEMALE' ,'');
 -- 用户信息
 CREATE TABLE user_profile(
   user_id UUID PRIMARY KEY,
   name VARCHAR(32) NOT NULL DEFAULT '', -- '昵称'
-  gender GenderType, -- '性别'
+  gender GenderType DEFAULT '', -- '性别'
   birthday TIMESTAMP WITH TIME ZONE,
   description VARCHAR(256) NOT NULL DEFAULT '', -- 自我描述
   utime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -53,7 +53,7 @@ CREATE TABLE user_profile(
 CREATE TABLE topic(
   id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
   name VARCHAR(32) NOT NULL, -- 话题名
-  description VARCHAR(256) NOT NULL DEFAULT '', -- 描述
+  introduction TEXT NOT NULL DEFAULT '', -- 描述
   utime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -61,9 +61,12 @@ CREATE TABLE topic(
 -- 问题
 CREATE TABLE question (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
-  title VARCHAR(32) NOT NULL, -- 问题标题 
+  title VARCHAR(64) NOT NULL, -- 问题标题
   description TEXT NOT NULL, -- 问题详细描述
-  user_id UUID NOT NULL UNIQUE,
+  user_id UUID NOT NULL,
+  view_count INTEGER NOT NULL DEFAULT 0, -- view count 查看数 一个用户只会计一次
+  answer_count INTEGER NOT NULL DEFAULT 0, -- answer count 回答数
+  answer_index FLOAT NOT NULL DEFAULT 0, -- 回答指数，在特定时间内收获的回答数
   utime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -81,6 +84,10 @@ CREATE TABLE answer (
   content TEXT NOT NULL, -- 回答正文
   question_id UUID NOT NULL, -- 问题ID
   user_id UUID NOT NULL,
+  view_count INTEGER NOT NULL DEFAULT 0, -- view count 查看数 一个用户只会计一次
+  like_count INTEGER NOT NULL DEFAULT 0, -- like count 喜欢数
+  dislike_count INTEGER NOT NULL DEFAULT 0, -- dislike count 不喜欢数
+  like_index FLOAT NOT NULL DEFAULT 0,  -- 喜欢指数，在特定时间内收获的点赞数
   utime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -97,23 +104,4 @@ CREATE TABLE answer_dislike(
   answer_id UUID NOT NULL,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY(user_id, answer_id)
-);
-
--- 问题统计
-CREATE TABLE question_stat(
-  question_id UUID NOT NULL, -- 问题ID
-  view_count INTEGER NOT NULL DEFAULT 0, -- view count 查看数 一个用户只会计一次
-  answer_count INTEGER NOT NULL DEFAULT 0, -- answer count 回答数
-  answer_index FLOAT NOT NULL DEFAULT 0, -- 回答指数，在特定时间内收获的回答数
-  PRIMARY KEY (question_id)
-);
-
--- 回答统计
-CREATE TABLE answer_stat(
-  answer_id UUID NOT NULL, -- 回答ID
-  view_count INTEGER NOT NULL DEFAULT 0, -- view count 查看数 一个用户只会计一次
-  like_count INTEGER NOT NULL DEFAULT 0, -- like count 喜欢数
-  dislike_count INTEGER NOT NULL DEFAULT 0, -- dislike count 不喜欢数
-  like_index FLOAT NOT NULL DEFAULT 0,  -- 喜欢指数，在特定时间内收获的点赞数
-  PRIMARY KEY(answer_id)
 );
