@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"eternal/filemanager"
 	"eternal/logging"
 	cmiddleware "eternal/middleware"
@@ -17,6 +18,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"net/http"
+	"os"
+	"os/signal"
+	"time"
 )
 
 const APPNAME = "eternal"
@@ -33,6 +37,7 @@ func main() {
 		api.PUT("/account/token", accountView.Login)                       // 登录
 		api.POST("/account", accountView.Signup)                           // 注册
 		api.GET("/supported_countries", accountView.GetSupportedCountries) // 获取支持的国家列表
+		api.GET("/file/:id", fileView.DownloadFile)                        // 下载文件
 
 		authApi := api.Group("", cmiddleware.AuthMiddleware)
 		authApi.DELETE("/account/token", accountView.Logout)  // 注销
@@ -123,6 +128,7 @@ func initEcho(f func(*echo.Echo)) {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.RequestID())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     allowOrigins,
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
@@ -134,5 +140,17 @@ func initEcho(f func(*echo.Echo)) {
 
 	f(e)
 
-	e.Logger.Fatal(e.Start(httpAddr))
+	go func() {
+		if err := e.Start(httpAddr); err != nil {
+			e.Logger.Info("shutting down the server")
+		}
+	}()
+	quit := make(chan os.Signal)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := e.Shutdown(ctx); err != nil {
+		e.Logger.Fatal(err)
+	}
 }

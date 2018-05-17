@@ -55,17 +55,13 @@ func (fm *LocalFileManager) Save(r io.Reader) (string, error) {
 }
 
 /* 读取文件 */
-func (fm *LocalFileManager) Read(key string, w io.Writer) error {
+func (fm *LocalFileManager) Read(key string) (io.Reader, error) {
 	savepath := path.Join(fm.Path, key)
 	file, err := os.Open(savepath)
 	if err != nil {
-		return ErrFileNotFound
+		return nil, ErrFileNotFound
 	}
-	defer file.Close()
-	if _, err := io.Copy(w, file); err != nil {
-		return err
-	}
-	return nil
+	return file, nil
 }
 
 /* 获取文件信息 */

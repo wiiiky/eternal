@@ -13,6 +13,8 @@ var (
 	ErrUseSMSCodeInvalid         = NewError(http.StatusBadRequest, 103, "短信验证码错误")
 	ErrMobileExisted             = NewError(http.StatusBadRequest, 104, "用户已存在")
 	ErrCountryCodeInvalid        = NewError(http.StatusBadRequest, 105, "国家不支持")
+
+	ErrFileNotFound = NewError(http.StatusNotFound, 1001, "文件不存在")
 )
 
 func NewError(status, code int, msg interface{}) error {

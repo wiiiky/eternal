@@ -1,16 +1,16 @@
 package user
 
 import (
-	"eternal/model/account"
-	"eternal/model/user"
+	accountModel "eternal/model/account"
+	userModel "eternal/model/user"
 	"eternal/view/errors"
 	"github.com/labstack/echo"
 	"net/http"
 )
 
 func GetUserProfile(ctx echo.Context) error {
-	a := ctx.Get("account").(*account.Account)
-	up, err := user.GetUserProfile(a.ID)
+	a := ctx.Get("account").(*accountModel.Account)
+	up, err := userModel.GetUserProfile(a.ID)
 	if err != nil {
 		return err
 	} else if up == nil {

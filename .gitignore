@@ -3,3 +3,4 @@
 /.buildconfig
 *.pyc
 __pycache__
+/files/

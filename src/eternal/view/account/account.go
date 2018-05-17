@@ -1,7 +1,7 @@
 package account
 
 import (
-	"eternal/model/account"
+	accountModel "eternal/model/account"
 	"eternal/model/db"
 	"eternal/view/errors"
 	"github.com/gorilla/sessions"
@@ -13,15 +13,15 @@ import (
 
 /* 获取当前支持的国家 */
 func GetSupportedCountries(ctx echo.Context) error {
-	countries, err := account.GetSupportedCountries()
+	countries, err := accountModel.GetSupportedCountries()
 	if err != nil {
 		return err
 	}
 	return ctx.JSON(http.StatusOK, countries)
 }
 
-func login(ctx echo.Context, a *account.Account) error {
-	tk, err := account.UpsertToken(a.ID)
+func login(ctx echo.Context, a *accountModel.Account) error {
+	tk, err := accountModel.UpsertToken(a.ID)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func Login(ctx echo.Context) error {
 	mobile := data.Mobile
 	password := data.Password
 
-	a, err := account.GetAccountWithMobile(mobile)
+	a, err := accountModel.GetAccountWithMobile(mobile)
 	if err != nil {
 		return err
 	} else if a == nil { /* 用户不存在 */
@@ -60,9 +60,9 @@ func Login(ctx echo.Context) error {
 }
 
 func Logout(ctx echo.Context) error {
-	a := ctx.Get("account").(*account.Account)
+	a := ctx.Get("account").(*accountModel.Account)
 
-	if err := account.DeleteToken(a.ID); err != nil {
+	if err := accountModel.DeleteToken(a.ID); err != nil {
 		return err
 	}
 
@@ -90,14 +90,14 @@ func Signup(ctx echo.Context) error {
 		return errors.ErrUserPasswordLengthInvalid
 	}
 
-	country, err := account.GetSupportedCountryWithCode(countryCode)
+	country, err := accountModel.GetSupportedCountryWithCode(countryCode)
 	if err != nil {
 		return err
 	} else if country == nil {
 		return errors.ErrCountryCodeInvalid
 	}
 
-	a, err := account.CreateAccount(countryCode, mobile, password, account.PTYPE_MD5)
+	a, err := accountModel.CreateAccount(countryCode, mobile, password, accountModel.PTYPE_MD5)
 	if err == db.ErrKeyDuplicate {
 		return errors.ErrMobileExisted
 	} else if err != nil {
@@ -109,6 +109,6 @@ func Signup(ctx echo.Context) error {
 
 /* 获取帐号信息 */
 func GetAccountInfo(ctx echo.Context) error {
-	a := ctx.Get("account").(*account.Account)
+	a := ctx.Get("account").(*accountModel.Account)
 	return ctx.JSON(http.StatusOK, a)
 }

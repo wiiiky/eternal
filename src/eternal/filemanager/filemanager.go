@@ -27,7 +27,7 @@ type FileManager interface {
 	Save(io.Reader) (string, error)
 
 	/* 读取文件 */
-	Read(string, io.Writer) error
+	Read(string) (io.Reader, error)
 
 	/* 获取我文件信息 */
 	Stat(string) (*FileStat, error)

@@ -13,7 +13,9 @@ servers:
 # 接口分组定义
 tags:
   - name: account
-    description: 账号相关
+    description: 账号
+  - name: file
+    description: 文件
 
 paths:
   /account:
@@ -36,6 +38,70 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AuthToken"
+        '400':
+          description: "客户端请求出错"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '500':
+          description: "服务器内部错误"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /file:
+    post:
+      tags:
+         - file
+      summary: 上传文件
+      description: 使用FORM提交文件
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/File"
+        '400':
+          description: "客户端请求出错"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '500':
+          description: "服务器内部错误"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /file/{id}:
+    post:
+      tags:
+         - file
+      summary: 下载文件
+      description: 根据文件ID下载文件
+      operationId: downloadFile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 文件ID
+      responses:
+        '200':
+          description: OK，Content-Type根据文件类型而定
         '400':
           description: "客户端请求出错"
           content:
@@ -94,3 +160,16 @@ components:
           type: string
           description: 用户密码
           example: "123456"
+    File:
+      type: object
+      description: 文件信息
+      properties:
+        id:
+          type: string
+          description: 文件ID
+          example: 227982f6de2c4d2e684fcc782e0f5f89
+        content_type:
+          type: string
+          description: 文件类型
+          example: image/jpeg
+        
