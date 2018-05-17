@@ -2,3 +2,4 @@
 /bin
 /.buildconfig
 *.pyc
+__pycache__

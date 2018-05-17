@@ -86,7 +86,7 @@ def save_question(title, description, topics):
         return r[0], False
     userID = new_user()
     pk = str(uuid.uuid4())
-    cur.execute('''INSERT INTO question(id,title,description,user_id) VALUES(%s,%s,%s,%s)''',
+    cur.execute('''INSERT INTO question(id,title,content,user_id) VALUES(%s,%s,%s,%s)''',
                 (pk, title, description, userID))
     for t in topics:
         cur.execute(

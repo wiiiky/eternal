@@ -9,7 +9,7 @@ type Topic struct {
 	TableName   struct{}  `sql:"topic" json:"-"`
 	ID          string    `sql:"id" json:"id"`
 	Name        string    `sql:"name" json:"name"`
-	Description string    `sql:"description" json:"description"`
+	Content     string    `sql:"content" json:"content"`
 	UTime       time.Time `sql:"utime,null" json:"utime"`
 	CTime       time.Time `sql:"ctime,null" json:"ctime"`
 }
@@ -18,7 +18,7 @@ type Question struct {
 	TableName   struct{}             `sql:"question" json:"-"`
 	ID          string               `sql:"id", json:"id"`
 	Title       string               `sql:"title" json:"title"`
-	Description string               `sql:"description" json:"description"`
+	Content     string               `sql:"content" json:"content"`
 	UserID      string               `sql:"user_id" json:"-"`
 	UTime       time.Time            `sql:"utime,null" json:"utime"`
 	CTime       time.Time            `sql:"ctime,null" json:"ctime"`
