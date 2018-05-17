@@ -104,7 +104,7 @@ func Signup(ctx echo.Context) error {
 	if err != nil {
 		return err
 	} else if country == nil {
-
+		return ErrCountryCodeInvalid
 	}
 
 	a, err := account.CreateAccount(countryCode, mobile, password, account.PTYPE_MD5)

@@ -1,0 +1,96 @@
+openapi: 3.0.0
+info:
+  title: 十年接口文档
+  description: 采用REST FULL规范
+  version: 1.0.0
+  contact:
+    email: wiiiky@outlook.com
+
+servers:
+  - url: 'http://127.0.0.1:1323/api/'
+    description: 测试环境地址
+
+# 接口分组定义
+tags:
+  - name: account
+    description: 账号相关
+
+paths:
+  /account:
+    post:
+      tags:
+         - account
+      summary: 注册账号
+      description: 注册账号，必须使用手机号码注册
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthToken"
+        '400':
+          description: "客户端请求出错"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '500':
+          description: "服务器内部错误"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    Error:
+      type: object
+      description: 错误提示
+      properties:
+        code:
+          type: integer
+          description: 错误码
+          example: 101
+        message:
+          type: string
+          description: 错误信息
+          example: 用户名密码错误
+      required:
+        - code
+        - message
+    AuthToken:
+      type: object
+      description: 登录凭证
+      properties:
+        token:
+          type: string
+          description: TOKEN
+          example: 36f20681-1276-4286-8d7a-d2847c16d6ab
+    RegisterRequest:
+      type: object
+      description: 用户注册信息
+      properties:
+        country_code:
+          type: string
+          description: 国家码
+          example: "86"
+        mobile:
+          type: string
+          description: 手机号码
+          example: "18621578819"
+        code:
+          type: string
+          description: 短信验证码
+          example: "123456"
+        password:
+          type: string
+          description: 用户密码
+          example: "123456"
