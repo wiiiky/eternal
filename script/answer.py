@@ -38,9 +38,9 @@ params = (
 
 def get_answers(pk):
     try:
-		response = requests.get('https://www.zhihu.com/api/v4/questions/' +
-		                        str(pk) + '/answers', headers=headers, params=params, cookies=cookies)
-		return response.json()['data']
-	except Exception as e:
+        response = requests.get('https://www.zhihu.com/api/v4/questions/' +
+                                str(pk) + '/answers', headers=headers, params=params, cookies=cookies)
+        return response.json()['data']
+    except Exception as e:
         print(e)
         return []
