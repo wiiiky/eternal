@@ -1,8 +1,9 @@
-package view
+package account
 
 import (
 	"eternal/model/account"
 	"eternal/model/db"
+	"eternal/view/errors"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo-contrib/session"
@@ -17,12 +18,6 @@ func GetSupportedCountries(ctx echo.Context) error {
 		return err
 	}
 	return ctx.JSON(http.StatusOK, countries)
-}
-
-type iLogin struct {
-	CountryCode string `json:"country_code" form:"country_code" query:"country_code"`
-	Mobile      string `json:"mobile" form:"mobile" query:"mobile"`
-	Password    string `json:"password" form:"password" query:"password"`
 }
 
 func login(ctx echo.Context, a *account.Account) error {
@@ -43,7 +38,7 @@ func login(ctx echo.Context, a *account.Account) error {
 
 /* 登录 */
 func Login(ctx echo.Context) error {
-	data := iLogin{}
+	data := LoginRequest{}
 	if err := ctx.Bind(&data); err != nil {
 		return err
 	}
@@ -54,10 +49,10 @@ func Login(ctx echo.Context) error {
 	if err != nil {
 		return err
 	} else if a == nil { /* 用户不存在 */
-		return ErrUserNotFound
+		return errors.ErrUserNotFound
 	}
 	if !a.Auth(password) { /* 密码错误 */
-		return ErrUserPasswordInvalid
+		return errors.ErrUserPasswordInvalid
 	}
 	log.Debugf("User %s logged in", mobile)
 
@@ -77,14 +72,9 @@ func Logout(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-type iSignup struct {
-	iLogin
-	Code string `json:"code" form:"code" query:"code"`
-}
-
 /* 注册 */
 func Signup(ctx echo.Context) error {
-	data := iSignup{}
+	data := SignupRequest{}
 	if err := ctx.Bind(&data); err != nil {
 		return err
 	}
@@ -94,22 +84,22 @@ func Signup(ctx echo.Context) error {
 	code := data.Code
 
 	if code != "123456" {
-		return ErrUseSMSCodeInvalid
+		return errors.ErrUseSMSCodeInvalid
 	}
 	if len(password) <= 4 || len(password) >= 12 {
-		return ErrUserPasswordLengthInvalid
+		return errors.ErrUserPasswordLengthInvalid
 	}
 
 	country, err := account.GetSupportedCountryWithCode(countryCode)
 	if err != nil {
 		return err
 	} else if country == nil {
-		return ErrCountryCodeInvalid
+		return errors.ErrCountryCodeInvalid
 	}
 
 	a, err := account.CreateAccount(countryCode, mobile, password, account.PTYPE_MD5)
 	if err == db.ErrKeyDuplicate {
-		return ErrMobileExisted
+		return errors.ErrMobileExisted
 	} else if err != nil {
 		return err
 	}

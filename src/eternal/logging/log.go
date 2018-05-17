@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func Start(format, level, output string) {
+func Init(format, level, output string) {
 	allFormatters := map[string]log.Formatter{
 		"json": &log.JSONFormatter{},
 		"text": &log.TextFormatter{},

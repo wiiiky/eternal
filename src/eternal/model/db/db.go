@@ -13,7 +13,7 @@ func Conn() *pg.DB {
 	return _db
 }
 
-func Start(sURL string) error {
+func Init(sURL string) error {
 	opts, err := pg.ParseURL(sURL)
 	if err != nil {
 		return err

@@ -1,10 +1,15 @@
 package main
 
 import (
+	"eternal/filemanager"
 	"eternal/logging"
 	cmiddleware "eternal/middleware"
 	"eternal/model/db"
-	"eternal/view"
+	accountView "eternal/view/account"
+	answerView "eternal/view/answer"
+	viewError "eternal/view/errors"
+	fileView "eternal/view/file"
+	userView "eternal/view/user"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo-contrib/session"
@@ -20,39 +25,35 @@ func main() {
 	initConfig()
 	initLogging()
 	initDatabase()
+	filemanager.Init()
 	initEcho(func(e *echo.Echo) {
 		api := e.Group("/api")
-		// 登录
-		api.PUT("/account/token", view.Login)
-		// 注册
-		api.POST("/account", view.Signup)
-		// 获取支持的国家列表
-		api.GET("/supported_countries", view.GetSupportedCountries)
+
+		// 登录注册
+		api.PUT("/account/token", accountView.Login)                       // 登录
+		api.POST("/account", accountView.Signup)                           // 注册
+		api.GET("/supported_countries", accountView.GetSupportedCountries) // 获取支持的国家列表
 
 		authApi := api.Group("", cmiddleware.AuthMiddleware)
-		// 注册
-		authApi.DELETE("/account/token", view.Logout)
-		// 获取账号信息
-		authApi.GET("/account", view.GetAccountInfo)
-		// 获取用户信息
-		authApi.GET("/user/profile", view.GetUserProfile)
-		// 获取问题列表
-		authApi.GET("/questions", view.FindQuestions)
-		authApi.POST("/answer/:id/like", view.AddAnswerLike)
-		// authAPI.DELETE("/answer/:id/like", view.DeleteAnswerLike)
-		authApi.POST("/answer/:id/dislike", view.AddAnswerDislike)
-		// authAPI.DELETE("/answer/:id/dislike", view.DeleteAnswerDislike)
-		authApi.GET("/hot/questions", view.FindHotQuestions)
+		authApi.DELETE("/account/token", accountView.Logout)  // 注销
+		authApi.GET("/account", accountView.GetAccountInfo)   // 获取账号信息
+		authApi.GET("/user/profile", userView.GetUserProfile) // 获取用户信息
+		// 回答相关
+		authApi.POST("/answer/:id/like", answerView.AddAnswerLike)
+		authApi.POST("/answer/:id/dislike", answerView.AddAnswerDislike)
+
+		// 上传文件
+		authApi.POST("/file", fileView.UploadFile)
 	})
 }
 
 func errorHandler(err error, c echo.Context) {
-	if e, ok := err.(*view.Error); ok {
+	if e, ok := err.(*viewError.Error); ok {
 		c.JSON(e.HttpStatus, e)
 	} else if e, ok := err.(*echo.HTTPError); ok {
-		c.JSON(e.Code, view.NewError(0, -1, e.Message))
+		c.JSON(e.Code, viewError.NewError(0, -1, e.Message))
 	} else {
-		c.JSON(http.StatusInternalServerError, view.NewError(0, -1, err.Error()))
+		c.JSON(http.StatusInternalServerError, viewError.NewError(0, -1, err.Error()))
 	}
 }
 
@@ -80,13 +81,13 @@ func initLogging() {
 	viper.SetDefault("log.level", "info")
 	viper.SetDefault("log.output", "stdout")
 
-	logging.Start(viper.GetString("log.format"), viper.GetString("log.level"), viper.GetString("log.output"))
+	logging.Init(viper.GetString("log.format"), viper.GetString("log.level"), viper.GetString("log.output"))
 }
 
 /* 初始化数据库 */
 func initDatabase() {
 	dbURL := viper.GetString("database.url")
-	if err := db.Start(dbURL); err != nil {
+	if err := db.Init(dbURL); err != nil {
 		log.Fatal("Connecting database failed:", err)
 	}
 }

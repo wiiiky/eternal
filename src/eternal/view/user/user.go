@@ -1,8 +1,9 @@
-package view
+package user
 
 import (
 	"eternal/model/account"
 	"eternal/model/user"
+	"eternal/view/errors"
 	"github.com/labstack/echo"
 	"net/http"
 )
@@ -13,7 +14,7 @@ func GetUserProfile(ctx echo.Context) error {
 	if err != nil {
 		return err
 	} else if up == nil {
-		return ErrUserNotFound
+		return errors.ErrUserNotFound
 	} else {
 		return ctx.JSON(http.StatusOK, up)
 	}

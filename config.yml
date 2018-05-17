@@ -18,3 +18,8 @@ log:
 
 database:
   url: postgres://postgres@127.0.0.1/eternal?sslmode=disable
+
+filemanager:
+  type: local
+  local:
+    path: ./files
