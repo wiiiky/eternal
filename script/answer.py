@@ -37,6 +37,10 @@ params = (
 
 
 def get_answers(pk):
-    response = requests.get('https://www.zhihu.com/api/v4/questions/' +
-                            str(pk) + '/answers', headers=headers, params=params, cookies=cookies)
-    return response.json()['data']
+    try:
+		response = requests.get('https://www.zhihu.com/api/v4/questions/' +
+		                        str(pk) + '/answers', headers=headers, params=params, cookies=cookies)
+		return response.json()['data']
+	except Exception as e:
+        print(e)
+        return []
