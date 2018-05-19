@@ -11,6 +11,7 @@ import (
 	viewError "eternal/view/errors"
 	fileView "eternal/view/file"
 	userView "eternal/view/user"
+	"github.com/go-playground/validator"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo-contrib/session"
@@ -25,12 +26,22 @@ import (
 
 const APPNAME = "eternal"
 
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
+}
+
 func main() {
 	initConfig()
 	initLogging()
 	initDatabase()
 	filemanager.Init()
 	initEcho(func(e *echo.Echo) {
+		e.Validator = &CustomValidator{validator: validator.New()}
+
 		api := e.Group("/api")
 
 		// 登录注册
@@ -43,6 +54,7 @@ func main() {
 		authApi.DELETE("/account/token", accountView.Logout)  // 注销
 		authApi.GET("/account", accountView.GetAccountInfo)   // 获取账号信息
 		authApi.GET("/user/profile", userView.GetUserProfile) // 获取用户信息
+		authApi.PUT("/user/cover", userView.UpdateUserCover)  // 更新用户的封面图
 		// 回答相关
 		authApi.POST("/answer/:id/like", answerView.AddAnswerLike)
 		authApi.POST("/answer/:id/dislike", answerView.AddAnswerDislike)
@@ -67,7 +79,7 @@ func errorHandler(err error, c echo.Context) {
  * https://github.com/spf13/viper
  */
 func initConfig() {
-	viper.SetConfigName("eternal")            // name of config file (without extension)
+	viper.SetConfigName("eternal")           // name of config file (without extension)
 	viper.AddConfigPath("/etc/" + APPNAME)   // path to look for the config file in
 	viper.AddConfigPath("$HOME/." + APPNAME) // call multiple times to add many search paths
 	viper.AddConfigPath(".")

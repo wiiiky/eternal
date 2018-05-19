@@ -22,3 +22,18 @@ func GetUserProfile(userID string) (*account.UserProfile, error) {
 	}
 	return up, nil
 }
+
+func UpdateUserCover(userID, cover string) (*account.UserProfile, error) {
+	conn := db.Conn()
+
+	up := &account.UserProfile{
+		UserID: userID,
+		Cover:  cover,
+	}
+	_, err := conn.Model(up).Column("cover").WherePK().Update()
+	if err != nil {
+		log.Error("SQL Error:", err)
+		return nil, err
+	}
+	return GetUserProfile(userID)
+}
