@@ -67,7 +67,7 @@ func errorHandler(err error, c echo.Context) {
  * https://github.com/spf13/viper
  */
 func initConfig() {
-	viper.SetConfigName("config")            // name of config file (without extension)
+	viper.SetConfigName("eternal")            // name of config file (without extension)
 	viper.AddConfigPath("/etc/" + APPNAME)   // path to look for the config file in
 	viper.AddConfigPath("$HOME/." + APPNAME) // call multiple times to add many search paths
 	viper.AddConfigPath(".")
