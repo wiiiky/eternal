@@ -95,6 +95,7 @@ CREATE TABLE answer (
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX answer__question_id ON answer(question_id);
+CREATE INDEX answer__user_id ON answer(user_id);
 
 CREATE TABLE answer_like(
   user_id UUID NOT NULL,
