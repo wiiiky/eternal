@@ -1,8 +1,8 @@
-package answer
+package question
 
 import (
 	accountModel "eternal/model/account"
-	answerModel "eternal/model/answer"
+	questionModel "eternal/model/question"
 	"github.com/labstack/echo"
 	"net/http"
 )
@@ -10,7 +10,7 @@ import (
 func AddAnswerLike(ctx echo.Context) error {
 	a := ctx.Get("account").(*accountModel.Account)
 	answerID := ctx.Param("id")
-	err := answerModel.AddAnswerLike(a.ID, answerID)
+	err := questionModel.AddAnswerLike(a.ID, answerID)
 	if err != nil {
 		return err
 	}
@@ -20,7 +20,7 @@ func AddAnswerLike(ctx echo.Context) error {
 func AddAnswerDislike(ctx echo.Context) error {
 	a := ctx.Get("account").(*accountModel.Account)
 	answerID := ctx.Param("id")
-	err := answerModel.AddAnswerDislike(a.ID, answerID)
+	err := questionModel.AddAnswerDislike(a.ID, answerID)
 	if err != nil {
 		return err
 	}

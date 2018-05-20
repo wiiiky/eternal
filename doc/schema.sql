@@ -27,7 +27,7 @@ CREATE TABLE account(
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(mobile)
 );
-CREATE INDEX account_mobile ON account(mobile);
+CREATE INDEX account__mobile ON account(mobile);
 
 -- Token
 CREATE TABLE token(
@@ -94,6 +94,7 @@ CREATE TABLE answer (
   utime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+CREATE INDEX answer__question_id ON answer(question_id);
 
 CREATE TABLE answer_like(
   user_id UUID NOT NULL,
@@ -115,3 +116,20 @@ CREATE TABLE file(
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY(id)
 );
+
+/* 
+ * 热门回答
+ * 在一定时间内点赞数达到一定程度的回答
+ * 使用定时任务计算热门回答
+ */
+CREATE TABLE hot_answer(
+	id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
+	answer_id UUID NOT NULL, -- 回答ID
+	question_id UUID NOT NULL, -- 所属问题
+	topic_id UUID NOT NULL, -- 所属话题,
+	ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX hot_answer__answer_id ON hot_answer(answer_id);
+CREATE INDEX hot_answer__question_id ON hot_answer(question_id);
+CREATE INDEX hot_answer__topic_id ON hot_answer(topic_id);
+CREATE INDEX hot_answer__ctime ON hot_answer(ctime);

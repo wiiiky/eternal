@@ -1,10 +1,21 @@
-package answer
+package question
 
 import (
 	"eternal/model/db"
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 )
+
+func FindHotAnswers(userID string, page, limit int) ([]*HotAnswer, error) {
+	conn := db.Conn()
+	answers := make([]*HotAnswer, 0)
+	err := conn.Model(&answers).Column("hot_answer.*", "Answer", "Topic", "Question", "Answer.User").Offset((page - 1) * limit).Limit(limit).Order("hot_answer.ctime DESC").Select()
+	if err != nil {
+		log.Error("SQL Error:", err)
+		return nil, err
+	}
+	return answers, nil
+}
 
 /* 添加喜欢 */
 func AddAnswerLike(userID, answerID string) error {

@@ -7,9 +7,10 @@ import (
 	cmiddleware "eternal/middleware"
 	"eternal/model/db"
 	accountView "eternal/view/account"
-	answerView "eternal/view/answer"
 	viewError "eternal/view/errors"
 	fileView "eternal/view/file"
+	homeView "eternal/view/home"
+	questionView "eternal/view/question"
 	userView "eternal/view/user"
 	"github.com/go-playground/validator"
 	"github.com/gorilla/sessions"
@@ -51,13 +52,16 @@ func main() {
 		api.GET("/file/:id", fileView.DownloadFile)                        // 下载文件
 
 		authApi := api.Group("", cmiddleware.AuthMiddleware)
-		authApi.DELETE("/account/token", accountView.Logout)  // 注销
-		authApi.GET("/account", accountView.GetAccountInfo)   // 获取账号信息
+		authApi.DELETE("/account/token", accountView.Logout) // 注销
+		authApi.GET("/account", accountView.GetAccountInfo)  // 获取账号信息
+		// 用户相关
 		authApi.GET("/user/profile", userView.GetUserProfile) // 获取用户信息
 		authApi.PUT("/user/cover", userView.UpdateUserCover)  // 更新用户的封面图
+		// 主页相关
+		authApi.GET("/home/hot/answers", homeView.GetHotAnswers) // 获取热门回答
 		// 回答相关
-		authApi.POST("/answer/:id/like", answerView.AddAnswerLike)
-		authApi.POST("/answer/:id/dislike", answerView.AddAnswerDislike)
+		authApi.POST("/answer/:id/like", questionView.AddAnswerLike)
+		authApi.POST("/answer/:id/dislike", questionView.AddAnswerDislike)
 
 		// 上传文件
 		authApi.POST("/file", fileView.UploadFile)
