@@ -16,8 +16,40 @@ tags:
     description: 账号
   - name: file
     description: 文件
+  - name: home
+    description: 主页
 
 paths:
+  /home/hot/answers:
+    get:
+      tags:
+        - home
+      summary: 获取热门回答
+      description: 获取热门回答
+      operationId: findHotAnswers
+      parameters:
+        - name: page
+          in: query
+          description: 分页
+          schema:
+            type: integer
+          example: 1
+        - name: limit
+          in: query
+          description: 每页显示数
+          schema:
+            type: integer
+          example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  $ref: "#/components/schemas/HotAnswer"
   /account:
     post:
       tags:
@@ -38,18 +70,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AuthToken"
-        '400':
-          description: "客户端请求出错"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        '500':
-          description: "服务器内部错误"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
   /file:
     post:
       tags:
@@ -73,18 +93,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/File"
-        '400':
-          description: "客户端请求出错"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        '500':
-          description: "服务器内部错误"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
   /file/{id}:
     post:
       tags:
@@ -102,18 +110,6 @@ paths:
       responses:
         '200':
           description: OK，Content-Type根据文件类型而定
-        '400':
-          description: "客户端请求出错"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        '500':
-          description: "服务器内部错误"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
 
 components:
   schemas:
@@ -172,4 +168,10 @@ components:
           type: string
           description: 文件类型
           example: image/jpeg
-        
+    HotAnswer:
+      type: object
+      description: 热门回答
+      properties:
+        id:
+          type: string
+          description: ID
