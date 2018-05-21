@@ -51,9 +51,22 @@ paths:
                   type: object
                   $ref: "#/components/schemas/HotAnswer"
   /account:
+    get:
+      tags:
+        - account
+      summary: 获取账号信息
+      description: 获取账号信息
+      operationId: getAccount
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
     post:
       tags:
-         - account
+        - account
       summary: 注册账号
       description: 注册账号，必须使用手机号码注册
       operationId: signup
@@ -62,7 +75,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RegisterRequest"
+              $ref: "#/components/schemas/SignupRequest"
       responses:
         '200':
           description: OK
@@ -70,10 +83,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AuthToken"
+  /account/token:
+    put:
+      tags:
+        - account
+      summary: 登录
+      description: 登录
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthToken"
+    delete:
+      tags:
+        - account
+      summary: 注销
+      description: 注销
+      operationId: logout
+      responses:
+        '200':
+          description: OK，会同时删除浏览器的Cookie
   /file:
     post:
       tags:
-         - file
+        - file
       summary: 上传文件
       description: 使用FORM提交文件
       operationId: uploadFile
@@ -96,7 +138,7 @@ paths:
   /file/{id}:
     post:
       tags:
-         - file
+        - file
       summary: 下载文件
       description: 根据文件ID下载文件
       operationId: downloadFile
@@ -128,6 +170,32 @@ components:
       required:
         - code
         - message
+    Account:
+      type: object
+      description: 账号信息
+      properties:
+        id:
+          type: string
+          description: 账号ID
+          example: 36f20681-1276-4286-8d7a-d2847c16d6ab
+        country_code:
+          type: string
+          description: 国家码
+          example: 86
+        mobile:
+          type: string
+          description: 手机号
+          example: 18621668842
+        ctime:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2018-05-17T18:13:12.677426638+08:00"
+        utime:
+          type: string
+          format: date-time
+          description: 更新时间
+          example: "2018-05-17T18:13:12.677426638+08:00"
     AuthToken:
       type: object
       description: 登录凭证
@@ -136,7 +204,19 @@ components:
           type: string
           description: TOKEN
           example: 36f20681-1276-4286-8d7a-d2847c16d6ab
-    RegisterRequest:
+    LoginRequest:
+      type: object
+      description: 用户注册信息
+      properties:
+        mobile:
+          type: string
+          description: 手机号码
+          example: "18621578819"
+        password:
+          type: string
+          description: 用户密码
+          example: "123456"
+    SignupRequest:
       type: object
       description: 用户注册信息
       properties:
