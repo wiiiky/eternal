@@ -1,3 +1,5 @@
+## 文档采用OpenAPI标准书写，可以使用https://editor.swagger.io查看
+
 openapi: 3.0.0
 info:
   title: 十年接口文档
@@ -9,6 +11,8 @@ info:
 servers:
   - url: 'http://127.0.0.1:1323/api/'
     description: 测试环境地址
+  - url: 'https://10.wikylyu.xyz/api/'
+    description: 正是环境地址
 
 # 接口分组定义
 tags:
