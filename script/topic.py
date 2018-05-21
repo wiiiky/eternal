@@ -28,6 +28,10 @@ headers = {
 
 
 def get_topic(pk):
-    response = requests.get(
-        'https://api.zhihu.com/topics/' + pk, headers=headers, cookies=cookies)
-    return response.json()
+    try:
+        response = requests.get(
+            'https://api.zhihu.com/topics/' + pk, headers=headers, cookies=cookies)
+        return response.json()
+    except Exception as e:
+        print(e)
+        return None

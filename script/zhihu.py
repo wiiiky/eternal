@@ -117,6 +117,8 @@ for i in range(100):
         actors = d['actors']
         for actor in actors:
             topic = get_topic(actor['id'])
+            if not topic:
+                continue
             pk = save_topic(topic['name'], topic['introduction'])
             topics.append(pk)
         pk, new = save_question(title, excerpt, topics)
