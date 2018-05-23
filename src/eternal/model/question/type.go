@@ -22,14 +22,14 @@ type Question struct {
 	UserID    string                    `sql:"user_id" json:"-"`
 	UTime     time.Time                 `sql:"utime,null" json:"utime"`
 	CTime     time.Time                 `sql:"ctime,null" json:"ctime"`
-	Topics    []*Topic                  `pg:"many2many:question_topic,fk:qid,joinFK:tid" json:"topics"`
+	Topics    []*Topic                  `pg:"many2many:question_topic,fk:question_id,joinFK:topic_id" json:"topics"`
 	User      *accountModel.UserProfile `sql:"-" json:"user"`
 }
 
 type QuestionTopic struct {
 	TableName struct{}  `sql:"question_topic" json:"-"`
-	QID       string    `sql:"qid,pk" json:"qid"`
-	TID       string    `sql:"tid,pk" json:"tid"`
+	QuesetionID       string    `sql:"question_id,pk" json:"question_id"`
+	TopicID       string    `sql:"topic_id,pk" json:"topic_id"`
 	CTime     time.Time `sql:"ctime,null" json:"ctime"`
 }
 

@@ -76,10 +76,10 @@ CREATE TABLE question (
 
 /* 问题和话题的关联表 */
 CREATE TABLE question_topic(
-  qid UUID NOT NULL, -- 问题ID
-  tid UUID NOT NULL, -- 话题ID
+  question_id UUID NOT NULL, -- 问题ID
+  topic_id UUID NOT NULL, -- 话题ID
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY(qid, tid)
+  PRIMARY KEY(question_id, topic_id)
 );
 
 CREATE TABLE answer (

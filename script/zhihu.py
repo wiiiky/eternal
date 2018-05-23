@@ -57,13 +57,17 @@ cur = db.cursor()
 
 
 def new_user():
-    pk = str(uuid.uuid4())
-    mobile = str(random.randint(18600000000, 18621578815))
-    cur.execute(
-        '''INSERT INTO account(id,country_code,mobile,salt,passwd,ptype) VALUES(%s,%s,%s,'','','MD5')''', (pk, '86', mobile))
-    cur.execute(
-        '''INSERT INTO user_profile(user_id,description) VALUES(%s,%s)''', (pk, ''))
-    return pk
+    while True:
+        try:
+            pk = str(uuid.uuid4())
+            mobile = str(random.randint(18600000000, 18621578815))
+            cur.execute(
+                '''INSERT INTO account(id,country_code,mobile,salt,passwd,ptype) VALUES(%s,%s,%s,'','','MD5')''', (pk, '86', mobile))
+            cur.execute(
+                '''INSERT INTO user_profile(user_id,description,name) VALUES(%s,%s,%s)''', (pk, '测试用户的简介', '测试用户'))
+            return pk
+        except:
+            pass
 
 
 def save_topic(name, introduction):
@@ -90,7 +94,7 @@ def save_question(title, description, topics):
                 (pk, title, description, userID))
     for t in topics:
         cur.execute(
-            '''INSERT INTO question_topic(qid,tid) VALUES(%s,%s)''', (pk, t))
+            '''INSERT INTO question_topic(question_id,topic_id) VALUES(%s,%s)''', (pk, t))
     return pk, True
 
 
