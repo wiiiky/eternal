@@ -94,11 +94,11 @@ def save_question(title, description, topics):
     return pk, True
 
 
-def save_answer(qid, content):
+def save_answer(qid, content, excerpt):
     userID = new_user()
     pk = str(uuid.uuid4())
-    cur.execute('''INSERT INTO answer(id,user_id,question_id,content) VALUES(%s,%s,%s,%s)''',
-                (pk, userID, qid, content))
+    cur.execute('''INSERT INTO answer(id,user_id,question_id,content,excerpt) VALUES(%s,%s,%s,%s,%s)''',
+                (pk, userID, qid, content, excerpt))
     return pk
 
 
@@ -126,7 +126,7 @@ for i in range(100):
             continue
         answers = get_answers(qid)
         for a in answers:
-            save_answer(pk, a['content'])
+            save_answer(pk, a['content'], a['excerpt'])
         print(title)
 
 db.commit()

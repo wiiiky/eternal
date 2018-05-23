@@ -85,6 +85,7 @@ CREATE TABLE question_topic(
 CREATE TABLE answer (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
   content TEXT NOT NULL, -- 回答正文
+  excerpt TEXT NOT NULL, -- 回答摘录
   question_id UUID NOT NULL, -- 问题ID
   user_id UUID NOT NULL,
   view_count INTEGER NOT NULL DEFAULT 0, -- view count 查看数 一个用户只会计一次

@@ -37,6 +37,7 @@ type Answer struct {
 	TableName    struct{}                  `sql:"answer" json:"-"`
 	ID           string                    `sql:"id" json:"id"`
 	Content      string                    `sql:"content" json:"content"`
+	Excerpt      string                    `sql:"excerpt" json:"excerpt"`
 	QuestionID   string                    `sql:"question_id" json:"question_id"`
 	UserID       string                    `sql:"user_id" json:"-"`
 	ViewCount    int64                     `sql:"view_count" json:"view_count"`
