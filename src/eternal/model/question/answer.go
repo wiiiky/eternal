@@ -8,17 +8,44 @@ import (
 
 func FindHotAnswers(userID string, page, limit int) ([]*HotAnswer, error) {
 	conn := db.Conn()
-	answers := make([]*HotAnswer, 0)
-	err := conn.Model(&answers).Column("hot_answer.*", "Answer", "Topic", "Question", "Answer.User").Offset((page - 1) * limit).Limit(limit).Order("hot_answer.ctime DESC").Select()
+	hotAnswers := make([]*HotAnswer, 0)
+
+	err := conn.Model(&hotAnswers).Column("hot_answer.*", "Answer", "Topic", "Question", "Answer.User").
+		Offset((page - 1) * limit).Limit(limit).Order("hot_answer.ctime DESC").Select()
 	if err != nil {
 		log.Error("SQL Error:", err)
 		return nil, err
 	}
-	return answers, nil
+	for _, hotAnswer := range hotAnswers {
+		hotAnswer.Relationship = &UserAnswerRelationship{}
+		upvote := AnswerUpvote{
+			UserID:   userID,
+			AnswerID: hotAnswer.Answer.ID,
+		}
+		if err := conn.Select(&upvote); err == nil {
+			hotAnswer.Relationship.Upvoted = true
+			continue // 如果存在点赞，则不继续查询是否有"踩"
+		} else if err != pg.ErrNoRows {
+			log.Error("SQL Error:", err)
+			return nil, err
+		}
+		downvote := AnswerDownvote{
+			UserID:   userID,
+			AnswerID: hotAnswer.Answer.ID,
+		}
+		if err := conn.Select(&downvote); err == nil {
+			hotAnswer.Relationship.Downvoted = true
+		} else if err != pg.ErrNoRows {
+			log.Error("SQL Error:", err)
+			return nil, err
+		}
+	}
+
+	return hotAnswers, nil
 }
 
 /* 添加喜欢 */
-func AddAnswerLike(userID, answerID string) error {
+func UpvoteAnswer(userID, answerID string) error {
 	conn := db.Conn()
 	tx, err := conn.Begin()
 	if err != nil {
@@ -38,28 +65,28 @@ func AddAnswerLike(userID, answerID string) error {
 		return err
 	}
 
-	dislike := AnswerDislike{
+	downvote := AnswerDownvote{
 		UserID:   userID,
 		AnswerID: answerID,
 	}
-	like := AnswerLike{
+	upvote := AnswerUpvote{
 		UserID:   userID,
 		AnswerID: answerID,
 	}
 
-	if err := tx.Select(&like); err == nil { /* “喜欢“标签已经存在 */
+	if err := tx.Select(&upvote); err == nil { /* “点赞“标签已经存在 */
 		return nil
 	} else if err != pg.ErrNoRows { /* 出错 */
 		log.Error("SQL Error", err)
 		return err
 	}
 
-	if err := tx.Select(&dislike); err == nil { /* 存在一个“不喜欢“标签，删除不喜欢 */
-		if err := tx.Delete(&dislike); err != nil {
+	if err := tx.Select(&downvote); err == nil { /* 存在一个“踩“标签，删除它 */
+		if err := tx.Delete(&downvote); err != nil {
 			log.Error("SQL Error", err)
 			return err
 		}
-		if _, err := tx.Model(&answer).Set("dislike_count = dislike_count - 1").Where("id=?id").Update(); err != nil {
+		if _, err := tx.Model(&answer).Set("downvote_count = downvote_count - 1").Where("id=?id").Update(); err != nil {
 			log.Error("SQL Error", err)
 			return err
 		}
@@ -68,12 +95,12 @@ func AddAnswerLike(userID, answerID string) error {
 		return err
 	}
 
-	if err := tx.Insert(&like); err != nil {
+	if err := tx.Insert(&upvote); err != nil {
 		log.Error("SQL Error", err)
 		return err
 	}
 
-	if _, err := tx.Model(&answer).Set("like_count = like_count + 1").Where("id=?id").Update(); err != nil {
+	if _, err := tx.Model(&answer).Set("upvote_count = upvote_count + 1").Where("id=?id").Update(); err != nil {
 		log.Error("SQL Error", err)
 		return err
 	}
@@ -86,7 +113,7 @@ func AddAnswerLike(userID, answerID string) error {
 }
 
 /* 添加不喜欢 */
-func AddAnswerDislike(userID, answerID string) error {
+func DownvoteAnswer(userID, answerID string) error {
 	conn := db.Conn()
 	tx, err := conn.Begin()
 	if err != nil {
@@ -106,28 +133,28 @@ func AddAnswerDislike(userID, answerID string) error {
 		return err
 	}
 
-	dislike := AnswerDislike{
+	downvote := AnswerDownvote{
 		UserID:   userID,
 		AnswerID: answerID,
 	}
-	like := AnswerLike{
+	upvote := AnswerUpvote{
 		UserID:   userID,
 		AnswerID: answerID,
 	}
 
-	if err := tx.Select(&dislike); err == nil { /* “不喜欢“标签已经存在 */
+	if err := tx.Select(&downvote); err == nil { /* “踩“已经存在 */
 		return nil
 	} else if err != pg.ErrNoRows { /* 出错 */
 		log.Error("SQL Error", err)
 		return err
 	}
 
-	if err := tx.Select(&like); err == nil { /* 存在一个“喜欢“标签，删除喜欢 */
-		if err := tx.Delete(&like); err != nil {
+	if err := tx.Select(&upvote); err == nil { /* 存在一个“点赞“标签，删除“点赞“ */
+		if err := tx.Delete(&upvote); err != nil {
 			log.Error("SQL Error", err)
 			return err
 		}
-		if _, err := tx.Model(&answer).Set("like_count = like_count - 1").Where("id=?id").Update(); err != nil {
+		if _, err := tx.Model(&answer).Set("upvote_count = upvote_count - 1").Where("id=?id").Update(); err != nil {
 			log.Error("SQL Error", err)
 			return err
 		}
@@ -136,12 +163,12 @@ func AddAnswerDislike(userID, answerID string) error {
 		return err
 	}
 
-	if err := tx.Insert(&dislike); err != nil {
+	if err := tx.Insert(&downvote); err != nil {
 		log.Error("SQL Error", err)
 		return err
 	}
 
-	if _, err := tx.Model(&answer).Set("dislike_count = dislike_count + 1").Where("id=?id").Update(); err != nil {
+	if _, err := tx.Model(&answer).Set("downvote_count = downvote_count + 1").Where("id=?id").Update(); err != nil {
 		log.Error("SQL Error", err)
 		return err
 	}

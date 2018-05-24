@@ -60,8 +60,8 @@ func main() {
 		// 主页相关
 		authApi.GET("/home/hot/answers", homeView.GetHotAnswers) // 获取热门回答
 		// 回答相关
-		authApi.POST("/answer/:id/like", questionView.AddAnswerLike)
-		authApi.POST("/answer/:id/dislike", questionView.AddAnswerDislike)
+		authApi.POST("/answer/:id/upvote", questionView.UpvoteAnswer)
+		authApi.POST("/answer/:id/downvote", questionView.DownvoteAnswer)
 
 		// 上传文件
 		authApi.POST("/file", fileView.UploadFile)

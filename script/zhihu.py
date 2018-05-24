@@ -106,7 +106,7 @@ def save_answer(qid, content, excerpt):
     return pk
 
 
-for i in range(100):
+for i in range(10):
     data = get_feeds(i)
     for d in data:
         if 'target' not in d:

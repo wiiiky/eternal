@@ -89,23 +89,22 @@ CREATE TABLE answer (
   question_id UUID NOT NULL, -- 问题ID
   user_id UUID NOT NULL,
   view_count INTEGER NOT NULL DEFAULT 0, -- view count 查看数 一个用户只会计一次
-  like_count INTEGER NOT NULL DEFAULT 0, -- like count 喜欢数
-  dislike_count INTEGER NOT NULL DEFAULT 0, -- dislike count 不喜欢数
-  like_index FLOAT NOT NULL DEFAULT 0,  -- 喜欢指数，在特定时间内收获的点赞数
+  upvote_count INTEGER NOT NULL DEFAULT 0, -- 点赞数
+  downvote_count INTEGER NOT NULL DEFAULT 0, -- 不喜欢数
   utime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX answer__question_id ON answer(question_id);
 CREATE INDEX answer__user_id ON answer(user_id);
 
-CREATE TABLE answer_like(
+CREATE TABLE answer_upvote(
   user_id UUID NOT NULL,
   answer_id UUID NOT NULL,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY(user_id, answer_id)
 );
 
-CREATE TABLE answer_dislike(
+CREATE TABLE answer_downvote(
   user_id UUID NOT NULL,
   answer_id UUID NOT NULL,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
