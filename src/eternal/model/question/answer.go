@@ -86,7 +86,7 @@ func UpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 			log.Error("SQL Error", err)
 			return 0, 0, err
 		}
-		if _, err := tx.Model(&answer).Set("downvote_count = downvote_count - 1").Where("id=?id").Returning("downvote_count").Update(); err != nil {
+		if _, err := tx.Model(&answer).Set("downvote_count = downvote_count - 1").WherePK().Returning("downvote_count").Update(); err != nil {
 			log.Error("SQL Error", err)
 			return 0, 0, err
 		}
@@ -100,7 +100,7 @@ func UpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 		return 0, 0, err
 	}
 
-	if _, err := tx.Model(&answer).Set("upvote_count = upvote_count + 1").Where("id=?id").Returning("upvote_count").Update(); err != nil {
+	if _, err := tx.Model(&answer).Set("upvote_count = upvote_count + 1").WherePK().Returning("upvote_count").Update(); err != nil {
 		log.Error("SQL Error", err)
 		return 0, 0, err
 	}
@@ -109,6 +109,50 @@ func UpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 		log.Error("SQL Error", err)
 		return 0, 0, err
 	}
+	return answer.UpvoteCount, answer.DownvoteCount, nil
+}
+
+/* 取消点赞 */
+func UndoUpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
+	conn := db.Conn()
+	tx, err := conn.Begin()
+	if err != nil {
+		log.Error("SQL Error", err)
+		return 0, 0, err
+	}
+	defer tx.Rollback()
+
+	answer := Answer{
+		ID: answerID,
+	}
+	if err := tx.Model(&answer).Column("id", "upvote_count", "downvote_count").WherePK().Select(); err != nil {
+		if err == pg.ErrNoRows {
+			return 0, 0, db.ErrKeyNotFound
+		}
+		log.Error("SQL Error", err)
+		return 0, 0, err
+	}
+
+	upvote := AnswerUpvote{
+		UserID:   userID,
+		AnswerID: answerID,
+	}
+	res, err := tx.Model(&upvote).WherePK().Delete()
+	if err != nil {
+		log.Error("SQL Error:", err)
+		return 0, 0, err
+	}
+	if res.RowsAffected() > 0 { /* 删除成功 */
+		if _, err := tx.Model(&answer).Set("upvote_count = upvote_count - 1").WherePK().Returning("upvote_count").Update(); err != nil {
+			log.Error("SQL Error", err)
+			return 0, 0, err
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		log.Error("SQL Error", err)
+		return 0, 0, err
+	}
+
 	return answer.UpvoteCount, answer.DownvoteCount, nil
 }
 
@@ -154,7 +198,7 @@ func DownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 			log.Error("SQL Error", err)
 			return 0, 0, err
 		}
-		if _, err := tx.Model(&answer).Set("upvote_count = upvote_count - 1").Where("id=?id").Returning("upvote_count").Update(); err != nil {
+		if _, err := tx.Model(&answer).Set("upvote_count = upvote_count - 1").WherePK().Returning("upvote_count").Update(); err != nil {
 			log.Error("SQL Error", err)
 			return 0, 0, err
 		}
@@ -168,7 +212,7 @@ func DownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 		return 0, 0, err
 	}
 
-	if _, err := tx.Model(&answer).Set("downvote_count = downvote_count + 1").Where("id=?id").Returning("downvote_count").Update(); err != nil {
+	if _, err := tx.Model(&answer).Set("downvote_count = downvote_count + 1").WherePK().Returning("downvote_count").Update(); err != nil {
 		log.Error("SQL Error", err)
 		return 0, 0, err
 	}
@@ -177,5 +221,49 @@ func DownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 		log.Error("SQL Error", err)
 		return 0, 0, err
 	}
+	return answer.UpvoteCount, answer.DownvoteCount, nil
+}
+
+/* 取消踩 */
+func UndoDownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
+	conn := db.Conn()
+	tx, err := conn.Begin()
+	if err != nil {
+		log.Error("SQL Error", err)
+		return 0, 0, err
+	}
+	defer tx.Rollback()
+
+	answer := Answer{
+		ID: answerID,
+	}
+	if err := tx.Model(&answer).Column("id", "upvote_count", "downvote_count").WherePK().Select(); err != nil {
+		if err == pg.ErrNoRows {
+			return 0, 0, db.ErrKeyNotFound
+		}
+		log.Error("SQL Error", err)
+		return 0, 0, err
+	}
+
+	downvote := AnswerDownvote{
+		UserID:   userID,
+		AnswerID: answerID,
+	}
+	res, err := tx.Model(&downvote).WherePK().Delete()
+	if err != nil {
+		log.Error("SQL Error:", err)
+		return 0, 0, err
+	}
+	if res.RowsAffected() > 0 { /* 删除成功 */
+		if _, err := tx.Model(&answer).Set("downvote_count = downvote_count - 1").WherePK().Returning("downvote_count").Update(); err != nil {
+			log.Error("SQL Error", err)
+			return 0, 0, err
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		log.Error("SQL Error", err)
+		return 0, 0, err
+	}
+
 	return answer.UpvoteCount, answer.DownvoteCount, nil
 }

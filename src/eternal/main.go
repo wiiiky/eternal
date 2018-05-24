@@ -62,6 +62,8 @@ func main() {
 		// 回答相关
 		authApi.POST("/answer/:id/upvote", questionView.UpvoteAnswer)
 		authApi.POST("/answer/:id/downvote", questionView.DownvoteAnswer)
+		authApi.DELETE("/answer/:id/upvote", questionView.UndoUpvoteAnswer)
+		authApi.DELETE("/answer/:id/downvote", questionView.UndoDownvoteAnswer)
 
 		// 上传文件
 		authApi.POST("/file", fileView.UploadFile)
