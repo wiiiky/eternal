@@ -44,25 +44,25 @@ func FindHotAnswers(userID string, page, limit int) ([]*HotAnswer, error) {
 	return hotAnswers, nil
 }
 
-/* 添加喜欢 */
-func UpvoteAnswer(userID, answerID string) error {
+/* 添加点赞，返回该回答的点赞数和踩数 */
+func UpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 	conn := db.Conn()
 	tx, err := conn.Begin()
 	if err != nil {
 		log.Error("SQL Error", err)
-		return err
+		return 0, 0, err
 	}
 	defer tx.Rollback()
 
 	answer := Answer{
 		ID: answerID,
 	}
-	if err := tx.Model(&answer).Column("answer.id").Select(); err != nil {
+	if err := tx.Model(&answer).Column("id", "upvote_count", "downvote_count").WherePK().Select(); err != nil {
 		if err == pg.ErrNoRows {
-			return db.ErrKeyNotFound
+			return 0, 0, db.ErrKeyNotFound
 		}
 		log.Error("SQL Error", err)
-		return err
+		return 0, 0, err
 	}
 
 	downvote := AnswerDownvote{
@@ -75,62 +75,62 @@ func UpvoteAnswer(userID, answerID string) error {
 	}
 
 	if err := tx.Select(&upvote); err == nil { /* “点赞“标签已经存在 */
-		return nil
+		return answer.UpvoteCount, answer.DownvoteCount, nil
 	} else if err != pg.ErrNoRows { /* 出错 */
 		log.Error("SQL Error", err)
-		return err
+		return 0, 0, err
 	}
 
 	if err := tx.Select(&downvote); err == nil { /* 存在一个“踩“标签，删除它 */
 		if err := tx.Delete(&downvote); err != nil {
 			log.Error("SQL Error", err)
-			return err
+			return 0, 0, err
 		}
-		if _, err := tx.Model(&answer).Set("downvote_count = downvote_count - 1").Where("id=?id").Update(); err != nil {
+		if _, err := tx.Model(&answer).Set("downvote_count = downvote_count - 1").Where("id=?id").Returning("downvote_count").Update(); err != nil {
 			log.Error("SQL Error", err)
-			return err
+			return 0, 0, err
 		}
 	} else if err != pg.ErrNoRows { /* 出错 */
 		log.Error("SQL Error", err)
-		return err
+		return 0, 0, err
 	}
 
 	if err := tx.Insert(&upvote); err != nil {
 		log.Error("SQL Error", err)
-		return err
+		return 0, 0, err
 	}
 
-	if _, err := tx.Model(&answer).Set("upvote_count = upvote_count + 1").Where("id=?id").Update(); err != nil {
+	if _, err := tx.Model(&answer).Set("upvote_count = upvote_count + 1").Where("id=?id").Returning("upvote_count").Update(); err != nil {
 		log.Error("SQL Error", err)
-		return err
+		return 0, 0, err
 	}
 
 	if err := tx.Commit(); err != nil {
 		log.Error("SQL Error", err)
-		return err
+		return 0, 0, err
 	}
-	return nil
+	return answer.UpvoteCount, answer.DownvoteCount, nil
 }
 
 /* 添加不喜欢 */
-func DownvoteAnswer(userID, answerID string) error {
+func DownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 	conn := db.Conn()
 	tx, err := conn.Begin()
 	if err != nil {
 		log.Error("SQL Error", err)
-		return err
+		return 0, 0, err
 	}
 	defer tx.Rollback()
 
 	answer := Answer{
 		ID: answerID,
 	}
-	if err := tx.Model(&answer).Column("answer.id").Select(); err != nil {
+	if err := tx.Model(&answer).Column("id", "upvote_count", "downvote_count").WherePK().Select(); err != nil {
 		if err == pg.ErrNoRows {
-			return db.ErrKeyNotFound
+			return 0, 0, db.ErrKeyNotFound
 		}
 		log.Error("SQL Error", err)
-		return err
+		return 0, 0, err
 	}
 
 	downvote := AnswerDownvote{
@@ -143,39 +143,39 @@ func DownvoteAnswer(userID, answerID string) error {
 	}
 
 	if err := tx.Select(&downvote); err == nil { /* “踩“已经存在 */
-		return nil
+		return answer.UpvoteCount, answer.DownvoteCount, nil
 	} else if err != pg.ErrNoRows { /* 出错 */
 		log.Error("SQL Error", err)
-		return err
+		return 0, 0, err
 	}
 
 	if err := tx.Select(&upvote); err == nil { /* 存在一个“点赞“标签，删除“点赞“ */
 		if err := tx.Delete(&upvote); err != nil {
 			log.Error("SQL Error", err)
-			return err
+			return 0, 0, err
 		}
-		if _, err := tx.Model(&answer).Set("upvote_count = upvote_count - 1").Where("id=?id").Update(); err != nil {
+		if _, err := tx.Model(&answer).Set("upvote_count = upvote_count - 1").Where("id=?id").Returning("upvote_count").Update(); err != nil {
 			log.Error("SQL Error", err)
-			return err
+			return 0, 0, err
 		}
 	} else if err != pg.ErrNoRows { /* 出错 */
 		log.Error("SQL Error", err)
-		return err
+		return 0, 0, err
 	}
 
 	if err := tx.Insert(&downvote); err != nil {
 		log.Error("SQL Error", err)
-		return err
+		return 0, 0, err
 	}
 
-	if _, err := tx.Model(&answer).Set("downvote_count = downvote_count + 1").Where("id=?id").Update(); err != nil {
+	if _, err := tx.Model(&answer).Set("downvote_count = downvote_count + 1").Where("id=?id").Returning("downvote_count").Update(); err != nil {
 		log.Error("SQL Error", err)
-		return err
+		return 0, 0, err
 	}
 
 	if err := tx.Commit(); err != nil {
 		log.Error("SQL Error", err)
-		return err
+		return 0, 0, err
 	}
-	return nil
+	return answer.UpvoteCount, answer.DownvoteCount, nil
 }

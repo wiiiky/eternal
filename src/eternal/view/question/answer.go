@@ -10,19 +10,25 @@ import (
 func UpvoteAnswer(ctx echo.Context) error {
 	a := ctx.Get("account").(*accountModel.Account)
 	answerID := ctx.Param("id")
-	err := questionModel.UpvoteAnswer(a.ID, answerID)
+	upvoteCount, downvoteCount, err := questionModel.UpvoteAnswer(a.ID, answerID)
 	if err != nil {
 		return err
 	}
-	return ctx.NoContent(http.StatusOK)
+	return ctx.JSON(http.StatusOK, &VoteAnswerResult{
+		UpvoteCount:   upvoteCount,
+		DownvoteCount: downvoteCount,
+	})
 }
 
 func DownvoteAnswer(ctx echo.Context) error {
 	a := ctx.Get("account").(*accountModel.Account)
 	answerID := ctx.Param("id")
-	err := questionModel.DownvoteAnswer(a.ID, answerID)
+	upvoteCount, downvoteCount, err := questionModel.DownvoteAnswer(a.ID, answerID)
 	if err != nil {
 		return err
 	}
-	return ctx.NoContent(http.StatusOK)
+	return ctx.JSON(http.StatusOK, &VoteAnswerResult{
+		UpvoteCount:   upvoteCount,
+		DownvoteCount: downvoteCount,
+	})
 }

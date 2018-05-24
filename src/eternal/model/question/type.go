@@ -40,9 +40,9 @@ type Answer struct {
 	Excerpt       string                    `sql:"excerpt" json:"excerpt"`
 	QuestionID    string                    `sql:"question_id" json:"question_id"`
 	UserID        string                    `sql:"user_id" json:"-"`
-	ViewCount     int64                     `sql:"view_count" json:"view_count"`
-	UpvoteCount   int64                     `sql:"upvote_count" json:"upvote_count"`
-	DownvoteCount int64                     `sql:"downvote_count" json:"downvote_count"`
+	ViewCount     uint64                    `sql:"view_count" json:"view_count"`
+	UpvoteCount   uint64                    `sql:"upvote_count" json:"upvote_count"`
+	DownvoteCount uint64                    `sql:"downvote_count" json:"downvote_count"`
 	UTime         time.Time                 `sql:"utime,null" json:"utime"`
 	CTime         time.Time                 `sql:"ctime,null" json:"ctime"`
 	User          *accountModel.UserProfile `json:"user"`

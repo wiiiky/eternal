@@ -20,12 +20,13 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		sess, _ := session.Get("session", c)
-		log.Debugf("Path = %s Session = %v", c.Path(), sess)
 		if sess == nil {
+			log.Debugf("session not found")
 			return c.NoContent(http.StatusUnauthorized)
 		}
 		v, ok := sess.Values["token"]
 		if !ok {
+			log.Debugf("token not found %v", sess)
 			return c.NoContent(http.StatusUnauthorized)
 		}
 		tokenID, ok := v.(string)

@@ -22,6 +22,8 @@ tags:
     description: 文件
   - name: home
     description: 主页
+  - name: question
+    description: 问题
 
 paths:
   /home/hot/answers:
@@ -139,6 +141,52 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/File"
+  /answer/{id}/upvote:
+    post:
+      tags:
+        - question
+      summary: 点赞回答
+      description: 点赞回答
+      operationId: upvoteAnswer
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          allowEmptyValue: false
+          description: 回答ID
+          example: 36f20681-1276-4286-8d7a-d2847c16d6ab
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoteAnswerResult"
+  /answer/{id}/downvote:
+    post:
+      tags:
+        - question
+      summary: 踩回答
+      description: 踩回答
+      operationId: downvoteAnswer
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          allowEmptyValue: false
+          description: 回答ID
+          example: 36f20681-1276-4286-8d7a-d2847c16d6ab
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoteAnswerResult"
   /file/{id}:
     post:
       tags:
@@ -252,10 +300,64 @@ components:
           type: string
           description: 文件类型
           example: image/jpeg
+    Answer:
+      type: object
+      description: 回答
+      properties:
+        id:
+          type: string
+          description: 回答ID
+          example: 7425b2c0-626b-429f-a334-ba4176f497ad
+        excerpt:
+          type: string
+          description: 摘要
+          example: 大家好，这是摘要
+        question_id:
+          type: string
+          description: 问题ID
+          example: 7425b2c0-626b-429f-a334-ba4176f497ad
+        user_id:
+          type: string
+          description: 回答者ID
+          example: 7425b2c0-626b-429f-a334-ba4176f497ad
+        view_count:
+          type: integer
+          description: 浏览数
+          example: 123
+        upvote_count:
+          type: integer
+          description: 点赞数
+          example: 123
+        downvote_count:
+          type: integer
+          description: 踩数
+          example: 232
+        ctime:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2018-05-17T18:13:12.677426638+08:00"
+        utime:
+          type: string
+          format: date-time
+          description: 更新时间
+          example: "2018-05-17T18:13:12.677426638+08:00"
     HotAnswer:
       type: object
       description: 热门回答
       properties:
-        id:
-          type: string
-          description: ID
+        answer:
+          type: object
+          $ref: "#/components/schemas/Answer"
+    VoteAnswerResult:
+      type: object
+      description: 点赞/踩回答的结果
+      properties:
+        upvote_count:
+          type: integer
+          description: 最终点赞数
+          example: 123
+        downvote_count:
+          type: integer
+          description: 最终踩数
+          example: 235
