@@ -164,6 +164,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/VoteAnswerResult"
+    delete:
+      tags:
+        - question
+      summary: 取消点赞
+      description: 取消点赞
+      operationId: undoUpvoteAnwser
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          allowEmptyValue: false
+          description: 回答ID
+          example: 36f20681-1276-4286-8d7a-d2847c16d6ab
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoteAnswerResult"
   /answer/{id}/downvote:
     post:
       tags:
@@ -171,6 +193,28 @@ paths:
       summary: 踩回答
       description: 踩回答
       operationId: downvoteAnswer
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          allowEmptyValue: false
+          description: 回答ID
+          example: 36f20681-1276-4286-8d7a-d2847c16d6ab
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoteAnswerResult"
+    delete:
+      tags:
+        - question
+      summary: 取消踩
+      description: 取消踩
+      operationId: undoDownvoteAnwser
       parameters:
         - name: id
           in: path
