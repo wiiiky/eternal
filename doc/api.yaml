@@ -231,6 +231,40 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/VoteAnswerResult"
+  /topics:
+    get:
+      tags:
+        - question
+      summary: 搜索话题
+      description: 搜索话题
+      operationId: findTopics
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          allowEmptyValue: false
+          description: 搜索关键字
+          example: 大学
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: string
+          allowEmptyValue: false
+          description: 返回数据数，默认为10
+          example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  $ref: "#/components/schemas/Topic"
   /file/{id}:
     post:
       tags:
@@ -405,3 +439,29 @@ components:
           type: integer
           description: 最终踩数
           example: 235
+    Topic:
+      type: object
+      description: 话题信息
+      properties:
+        id:
+          type: string
+          description: 话题ID
+          example: 73e8ea9a-6aea-4d2c-81ca-45826ae871c3
+        name:
+          type: string
+          description: 话题名
+          example: 大学
+        introduction:
+          type: string
+          description: 话题简介
+          example: 人类接受高层次教育、进行原创性研究的场所。<br>现在的大学一般包括一个能授予硕士和博士学位的研究生院和数个专业学院，以及能授予学士学位的一个本科生院。大学还包括高等专科学校
+        ctime:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2018-05-17T18:13:12.677426638+08:00"
+        utime:
+          type: string
+          format: date-time
+          description: 更新时间
+          example: "2018-05-17T18:13:12.677426638+08:00"
