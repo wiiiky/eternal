@@ -8,6 +8,17 @@ import (
 	"net/http"
 )
 
+func GetQuestion(ctx echo.Context) error {
+	questionID := ctx.Param("id")
+	question, err := questionModel.GetQuestion(questionID)
+	if err != nil {
+		return nil
+	} else if question == nil {
+		return errors.ErrQuestionNotFound
+	}
+	return ctx.JSON(http.StatusOK, question)
+}
+
 func CreateQuestion(ctx echo.Context) error {
 	userID := ctx.Get(middleware.CTX_KEY_ACCOUNT_ID).(string)
 	data := CreateQuestionRequest{}

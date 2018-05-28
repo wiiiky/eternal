@@ -16,7 +16,7 @@ type Topic struct {
 
 type Question struct {
 	TableName struct{}                  `sql:"question" json:"-"`
-	ID        string                    `sql:"id", json:"id"`
+	ID        string                    `sql:"id" json:"id"`
 	Title     string                    `sql:"title" json:"title"`
 	Content   string                    `sql:"content" json:"content"`
 	UserID    string                    `sql:"user_id" json:"-"`

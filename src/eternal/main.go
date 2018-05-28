@@ -68,6 +68,7 @@ func main() {
 		authApi.GET("/topics", questionView.FindTopics)
 		// 问题相关
 		authApi.POST("/question", questionView.CreateQuestion)
+		authApi.GET("/question/:id", questionView.GetQuestion)
 
 		// 上传文件
 		authApi.POST("/file", fileView.UploadFile)
