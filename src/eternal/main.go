@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
+	"eternal/errors"
 	"eternal/filemanager"
 	"eternal/logging"
 	cmiddleware "eternal/middleware"
 	"eternal/model/db"
 	accountView "eternal/view/account"
-	viewError "eternal/view/errors"
 	fileView "eternal/view/file"
 	homeView "eternal/view/home"
 	questionView "eternal/view/question"
@@ -66,6 +66,8 @@ func main() {
 		authApi.DELETE("/answer/:id/downvote", questionView.UndoDownvoteAnswer)
 		// 话题相关
 		authApi.GET("/topics", questionView.FindTopics)
+		// 问题相关
+		authApi.POST("/question", questionView.CreateQuestion)
 
 		// 上传文件
 		authApi.POST("/file", fileView.UploadFile)
@@ -73,12 +75,12 @@ func main() {
 }
 
 func errorHandler(err error, c echo.Context) {
-	if e, ok := err.(*viewError.Error); ok {
+	if e, ok := err.(*errors.Error); ok {
 		c.JSON(e.HttpStatus, e)
 	} else if e, ok := err.(*echo.HTTPError); ok {
-		c.JSON(e.Code, viewError.NewError(0, -1, e.Message))
+		c.JSON(e.Code, errors.NewError(0, -1, e.Message))
 	} else {
-		c.JSON(http.StatusInternalServerError, viewError.NewError(0, -1, err.Error()))
+		c.JSON(http.StatusInternalServerError, errors.NewError(0, -1, err.Error()))
 	}
 }
 

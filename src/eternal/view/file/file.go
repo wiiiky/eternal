@@ -1,9 +1,9 @@
 package file
 
 import (
+	"eternal/errors"
 	"eternal/filemanager"
 	fileModel "eternal/model/file"
-	"eternal/view/errors"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 	"net/http"

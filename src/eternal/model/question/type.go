@@ -27,10 +27,10 @@ type Question struct {
 }
 
 type QuestionTopic struct {
-	TableName   struct{}  `sql:"question_topic" json:"-"`
-	QuesetionID string    `sql:"question_id,pk" json:"question_id"`
-	TopicID     string    `sql:"topic_id,pk" json:"topic_id"`
-	CTime       time.Time `sql:"ctime,null" json:"ctime"`
+	TableName  struct{}  `sql:"question_topic" json:"-"`
+	QuestionID string    `sql:"question_id,pk" json:"question_id"`
+	TopicID    string    `sql:"topic_id,pk" json:"topic_id"`
+	CTime      time.Time `sql:"ctime,null" json:"ctime"`
 }
 
 type Answer struct {

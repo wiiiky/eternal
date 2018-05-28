@@ -8,6 +8,11 @@ import (
 	"net/http"
 )
 
+const (
+	CTX_KEY_ACCOUNT    = "account"
+	CTX_KEY_ACCOUNT_ID = "account.id"
+)
+
 func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	var freePathes = map[string]bool{
 		"/login":  true,
@@ -37,7 +42,8 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		if account == nil {
 			return c.NoContent(http.StatusUnauthorized)
 		}
-		c.Set("account", account)
+		c.Set(CTX_KEY_ACCOUNT, account)
+		c.Set(CTX_KEY_ACCOUNT_ID, account.ID)
 		return next(c)
 	}
 }

@@ -1,9 +1,9 @@
 package user
 
 import (
+	"eternal/errors"
 	accountModel "eternal/model/account"
 	userModel "eternal/model/user"
-	"eternal/view/errors"
 	"github.com/labstack/echo"
 	"net/http"
 )

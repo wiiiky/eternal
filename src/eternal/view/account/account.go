@@ -1,9 +1,8 @@
 package account
 
 import (
+	"eternal/errors"
 	accountModel "eternal/model/account"
-	"eternal/model/db"
-	"eternal/view/errors"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo-contrib/session"
@@ -98,9 +97,7 @@ func Signup(ctx echo.Context) error {
 	}
 
 	a, err := accountModel.CreateAccount(countryCode, mobile, password, accountModel.PTYPE_MD5)
-	if err == db.ErrKeyDuplicate {
-		return errors.ErrMobileExisted
-	} else if err != nil {
+	if err != nil {
 		return err
 	}
 

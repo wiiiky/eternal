@@ -141,6 +141,26 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/File"
+  /question:
+    post:
+      tags:
+        - question
+      summary: 创建问题
+      description: 创建问题
+      operationId: createQuestion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateQuestionRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
   /answer/{id}/upvote:
     post:
       tags:
@@ -326,6 +346,49 @@ components:
           format: date-time
           description: 更新时间
           example: "2018-05-17T18:13:12.677426638+08:00"
+    UserProfile:
+      type: object
+      description: 用户信息
+      properties:
+        user_id:
+          type: string
+          description: 用户ID
+          example: 36f20681-1276-4286-8d7a-d2847c16d6ab
+        name:
+          type: string
+          description: 用户名
+          example: Wiky
+        gender:
+          type: string
+          description: 性别famale、male
+          example: male
+        description:
+          type: string
+          description: 简介
+          example: 我是小白菜
+        avatar:
+          type: string
+          description: 头像ID
+          example: 36f20681-1276-4286-8d7a-d2847c16d6ab
+        cover:
+          type: string
+          description: 封面图ID
+          example: 36f20681-1276-4286-8d7a-d2847c16d6ab
+        birthday:
+          type: string
+          format: date-time
+          description: 生日
+          example: "2001-05-17T18:13:12.677426638+08:00"
+        ctime:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2018-05-17T18:13:12.677426638+08:00"
+        utime:
+          type: string
+          format: date-time
+          description: 更新时间
+          example: "2018-05-17T18:13:12.677426638+08:00"
     AuthToken:
       type: object
       description: 登录凭证
@@ -427,6 +490,9 @@ components:
         answer:
           type: object
           $ref: "#/components/schemas/Answer"
+        question:
+          type: object
+          $ref: "#/components/schemas/Question"
     VoteAnswerResult:
       type: object
       description: 点赞/踩回答的结果
@@ -455,6 +521,58 @@ components:
           type: string
           description: 话题简介
           example: 人类接受高层次教育、进行原创性研究的场所。<br>现在的大学一般包括一个能授予硕士和博士学位的研究生院和数个专业学院，以及能授予学士学位的一个本科生院。大学还包括高等专科学校
+        ctime:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2018-05-17T18:13:12.677426638+08:00"
+        utime:
+          type: string
+          format: date-time
+          description: 更新时间
+          example: "2018-05-17T18:13:12.677426638+08:00"
+    CreateQuestionRequest:
+      type: object
+      description: 创建问题
+      properties:
+        title:
+          type: string
+          description: 标题
+          example: 为什么？
+        content:
+          type: string
+          description: 详细描述，可以为空
+          example: 没有为什么
+        topics:
+          type: array
+          description: 话题列表
+          items:
+            type: string
+            example: 73e8ea9a-6aea-4d2c-81ca-45826ae871c3
+    Question:
+      type: object
+      description: 问题
+      properties:
+        id:
+          type: string
+          description: 问题ID
+          example: 73e8ea9a-6aea-4d2c-81ca-45826ae871c3
+        title:
+          type: string
+          description: 标题
+          example: 为什么知乎这么垃圾？
+        content:
+          type: string
+          description: 详细描述
+          example: 为什么？
+        topics:
+          type: array
+          items:
+            $ref: "#/components/schemas/Topic"
+          description: 话题列表
+        user:
+          type: object
+          $ref: "#/components/schemas/UserProfile"
         ctime:
           type: string
           format: date-time

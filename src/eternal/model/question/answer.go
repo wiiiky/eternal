@@ -1,6 +1,7 @@
 package question
 
 import (
+	"eternal/errors"
 	"eternal/model/db"
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
@@ -59,7 +60,7 @@ func UpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 	}
 	if err := tx.Model(&answer).Column("id", "upvote_count", "downvote_count").WherePK().Select(); err != nil {
 		if err == pg.ErrNoRows {
-			return 0, 0, db.ErrKeyNotFound
+			return 0, 0, errors.ErrAnswerNotFound
 		}
 		log.Error("SQL Error", err)
 		return 0, 0, err
@@ -127,7 +128,7 @@ func UndoUpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 	}
 	if err := tx.Model(&answer).Column("id", "upvote_count", "downvote_count").WherePK().Select(); err != nil {
 		if err == pg.ErrNoRows {
-			return 0, 0, db.ErrKeyNotFound
+			return 0, 0, errors.ErrAnswerNotFound
 		}
 		log.Error("SQL Error", err)
 		return 0, 0, err
@@ -171,7 +172,7 @@ func DownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 	}
 	if err := tx.Model(&answer).Column("id", "upvote_count", "downvote_count").WherePK().Select(); err != nil {
 		if err == pg.ErrNoRows {
-			return 0, 0, db.ErrKeyNotFound
+			return 0, 0, errors.ErrAnswerNotFound
 		}
 		log.Error("SQL Error", err)
 		return 0, 0, err
@@ -239,7 +240,7 @@ func UndoDownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 	}
 	if err := tx.Model(&answer).Column("id", "upvote_count", "downvote_count").WherePK().Select(); err != nil {
 		if err == pg.ErrNoRows {
-			return 0, 0, db.ErrKeyNotFound
+			return 0, 0, errors.ErrAnswerNotFound
 		}
 		log.Error("SQL Error", err)
 		return 0, 0, err

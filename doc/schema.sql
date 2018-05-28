@@ -66,11 +66,8 @@ CREATE INDEX topic__name ON topic(name);
 CREATE TABLE question (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
   title VARCHAR(64) NOT NULL, -- 问题标题
-  content TEXT NOT NULL, -- 问题详细描述
+  content TEXT NOT NULL DEFAULT '', -- 问题详细描述
   user_id UUID NOT NULL,
-  view_count INTEGER NOT NULL DEFAULT 0, -- view count 查看数 一个用户只会计一次
-  answer_count INTEGER NOT NULL DEFAULT 0, -- answer count 回答数
-  answer_index FLOAT NOT NULL DEFAULT 0, -- 回答指数，在特定时间内收获的回答数
   utime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

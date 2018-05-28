@@ -1,6 +1,7 @@
 package account
 
 import (
+	"eternal/errors"
 	"eternal/model/db"
 	"eternal/util"
 	"github.com/go-pg/pg"
@@ -55,7 +56,7 @@ func CreateAccount(countryCode, mobile, password, ptype string) (*Account, error
 			return nil, err
 		}
 	} else { /* 查询成功，手机号已存在 */
-		return nil, db.ErrKeyDuplicate
+		return nil, errors.ErrMobileExisted
 	}
 
 	salt, err := util.RandString(12)

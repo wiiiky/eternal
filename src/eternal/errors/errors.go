@@ -14,7 +14,11 @@ var (
 	ErrMobileExisted             = NewError(http.StatusBadRequest, 104, "用户已存在")
 	ErrCountryCodeInvalid        = NewError(http.StatusBadRequest, 105, "国家不支持")
 
-	ErrFileNotFound = NewError(http.StatusNotFound, 1001, "文件不存在")
+	/* 各种不存在 */
+	ErrFileNotFound     = NewError(http.StatusNotFound, 1001, "文件不存在")
+	ErrQuestionNotFound = NewError(http.StatusNotFound, 1002, "问题不存在")
+	ErrTopicNotFound    = NewError(http.StatusNotFound, 1003, "话题不存在")
+	ErrAnswerNotFound   = NewError(http.StatusNotFound, 1004, "回答不存在")
 )
 
 func NewError(status, code int, msg interface{}) error {
