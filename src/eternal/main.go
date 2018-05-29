@@ -69,6 +69,7 @@ func main() {
 		// 问题相关
 		authApi.POST("/question", questionView.CreateQuestion)
 		authApi.GET("/question/:id", questionView.GetQuestion)
+		authApi.GET("/question/:qid/answers", questionView.GetQuestionAnswers)
 
 		// 上传文件
 		authApi.POST("/file", fileView.UploadFile)
@@ -130,11 +131,6 @@ func initEcho(f func(*echo.Echo)) {
 	allowMethods := viper.GetStringSlice("http.cors.methods")
 	allowCredentials := viper.GetBool("http.cors.credentials")
 	sessionSecret := viper.GetString("http.session.secret")
-	log.Debugf("http.addr:%s", httpAddr)
-	log.Debugf("http.cors.origins:%s", allowOrigins)
-	log.Debugf("http.cors.methods:%s", allowMethods)
-	log.Debugf("http.cors.credentials:%v", allowCredentials)
-	log.Debugf("http.session.secret:%s", sessionSecret)
 	if httpAddr == "" {
 		log.Fatal("Incomplete config. http.addr not found")
 	}
@@ -151,6 +147,7 @@ func initEcho(f func(*echo.Echo)) {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.RequestID())
 	e.Use(middleware.RequestID())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     allowOrigins,

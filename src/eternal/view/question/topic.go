@@ -11,7 +11,7 @@ func FindTopics(ctx echo.Context) error {
 	if err := ctx.Bind(&data); err != nil {
 		return err
 	}
-	if err := ctx.Validate(data); err != nil {
+	if err := ctx.Validate(&data); err != nil {
 		return err
 	}
 	topics, err := questionModel.FindTopics(data.Query, data.Limit)

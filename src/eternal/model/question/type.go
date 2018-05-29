@@ -64,7 +64,7 @@ type HotAnswer struct {
 	Answer       *Answer                 `json:"answer"`
 	Question     *Question               `json:"question"`
 	Topic        *Topic                  `json:"topic"`
-	CTime        time.Time               `sql:"ctime,null" json:"-"`
+	CTime        time.Time               `sql:"ctime,null" json:"ctime"`
 	Relationship *UserAnswerRelationship `json:"relationship"`
 }
 

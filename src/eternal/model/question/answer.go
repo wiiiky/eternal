@@ -5,14 +5,41 @@ import (
 	"eternal/model/db"
 	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
-func FindHotAnswers(userID string, page, limit int) ([]*HotAnswer, error) {
+/* 获取问题下的回答 */
+func GetQuestionAnswers(userID, questionID string, page, limit int) ([]*Answer, error) {
+	conn := db.Conn()
+	answers := make([]*Answer, 0)
+
+	err := conn.Model(&answers).Column("User").Where("question_id = ?", questionID).Offset((page - 1) * limit).Limit(limit).Select()
+	if err != nil {
+		log.Error("SQL Error:", err)
+		return nil, err
+	}
+	return answers, nil
+}
+
+/* 获取热门回答 */
+func FindHotAnswers(userID string, before string, limit int) ([]*HotAnswer, error) {
 	conn := db.Conn()
 	hotAnswers := make([]*HotAnswer, 0)
 
-	err := conn.Model(&hotAnswers).Column("hot_answer.*", "Answer", "Topic", "Question", "Answer.User").
-		Offset((page - 1) * limit).Limit(limit).Order("hot_answer.ctime DESC").Select()
+	var beforeTime time.Time
+	var err error
+	if before == "" {
+		beforeTime = time.Now()
+	} else {
+		beforeTime, err = time.Parse(time.RFC3339, before)
+		if err != nil {
+			log.Warn("time.Parse failed:", err)
+			return nil, err
+		}
+	}
+
+	err = conn.Model(&hotAnswers).Column("hot_answer.*", "Answer", "Topic", "Question", "Answer.User").
+		Where("hot_answer.ctime < ?", beforeTime).Limit(limit).Order("hot_answer.ctime DESC").Select()
 	if err != nil {
 		log.Error("SQL Error:", err)
 		return nil, err
