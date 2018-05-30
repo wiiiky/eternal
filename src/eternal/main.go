@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"eternal/config"
 	"eternal/errors"
+	"eternal/event"
 	"eternal/filemanager"
 	"eternal/logging"
 	cmiddleware "eternal/middleware"
@@ -36,9 +38,10 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 }
 
 func main() {
-	initConfig()
+	config.Init()
 	initLogging()
 	initDatabase()
+	initEvent()
 	filemanager.Init()
 	initEcho(func(e *echo.Echo) {
 		e.Validator = &CustomValidator{validator: validator.New()}
@@ -87,21 +90,6 @@ func errorHandler(err error, c echo.Context) {
 }
 
 /*
- * 读取配置
- * https://github.com/spf13/viper
- */
-func initConfig() {
-	viper.SetConfigName("eternal")           // name of config file (without extension)
-	viper.AddConfigPath("/etc/" + APPNAME)   // path to look for the config file in
-	viper.AddConfigPath("$HOME/." + APPNAME) // call multiple times to add many search paths
-	viper.AddConfigPath(".")
-	if err := viper.ReadInConfig(); err != nil { // Handle errors reading the config file
-		panic(err)
-	}
-	viper.SetDefault("debug", true)
-}
-
-/*
  * 初始化日志记录
  * https://github.com/sirupsen/logrus
  */
@@ -119,6 +107,13 @@ func initDatabase() {
 	if err := db.Init(dbURL); err != nil {
 		log.Fatal("Connecting database failed:", err)
 	}
+}
+
+func initEvent() {
+	amqpURL := viper.GetString("event.amqp.url")
+	amqpExchange := viper.GetString("event.amqp.exchange")
+	amqpRouteKey := viper.GetString("event.amqp.route_key")
+	event.InitPub(amqpURL, amqpExchange, amqpRouteKey)
 }
 
 func initEcho(f func(*echo.Echo)) {

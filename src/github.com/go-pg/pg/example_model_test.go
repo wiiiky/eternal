@@ -490,6 +490,21 @@ func ExampleDB_Model_nullEmptyValue() {
 	// Output: false
 }
 
+func ExampleDB_Model_forEach() {
+	err := pgdb.Model((*Book)(nil)).
+		OrderExpr("id ASC").
+		ForEach(func(b *Book) error {
+			fmt.Println(b)
+			return nil
+		})
+	if err != nil {
+		panic(err)
+	}
+	// Output: Book<Id=1 Title="book 1">
+	// Book<Id=2 Title="book 2">
+	// Book<Id=3 Title="book 3">
+}
+
 func ExampleDB_Model_hasOne() {
 	type Profile struct {
 		Id   int
@@ -1001,6 +1016,6 @@ func ExampleDB_discardUnknownColumns() {
 	_, err = pgdb.QueryOne(&model2, "SELECT 1 AS id")
 	fmt.Printf("Model2: %v\n", err)
 
-	// Output: Model1: pg: can't find column=id in model=Model1
+	// Output: Model1: pg: can't find column=id in model=Model1 (try discard_unknown_columns)
 	// Model2: <nil>
 }

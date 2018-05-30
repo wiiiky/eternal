@@ -722,7 +722,7 @@ var _ = Describe("errors", func() {
 
 		var test Test
 		_, err := db.QueryOne(&test, "SELECT 1 AS col1, 2 AS col2")
-		Expect(err).To(MatchError("pg: can't find column=col2 in model=Test"))
+		Expect(err).To(MatchError("pg: can't find column=col2 in model=Test (try discard_unknown_columns)"))
 		Expect(test.Col1).To(Equal(1))
 	})
 
@@ -1045,9 +1045,47 @@ var _ = Describe("ORM", func() {
 	})
 
 	Describe("struct model", func() {
+		It("Select returns pg.ErrNoRows", func() {
+			book := new(Book)
+			err := db.Model(book).
+				Where("1 = 2").
+				Select()
+			Expect(err).To(Equal(pg.ErrNoRows))
+		})
+
+		It("Insert returns pg.ErrNoRows", func() {
+			book := new(Book)
+			err := db.Model(book).First()
+			Expect(err).NotTo(HaveOccurred())
+
+			_, err = db.Model(book).
+				OnConflict("DO NOTHING").
+				Returning("*").
+				Insert()
+			Expect(err).To(Equal(pg.ErrNoRows))
+		})
+
+		It("Update returns pg.ErrNoRows", func() {
+			book := new(Book)
+			_, err := db.Model(book).
+				Where("1 = 2").
+				Returning("*").
+				Update()
+			Expect(err).To(Equal(pg.ErrNoRows))
+		})
+
+		It("Delete returns pg.ErrNoRows", func() {
+			book := new(Book)
+			_, err := db.Model(book).
+				Where("1 = 2").
+				Returning("*").
+				Delete()
+			Expect(err).To(Equal(pg.ErrNoRows))
+		})
+
 		It("fetches Book relations", func() {
-			var book Book
-			err := db.Model(&book).
+			book := new(Book)
+			err := db.Model(book).
 				Column("book.id").
 				Relation("Author").
 				Relation("Author.Avatar").
@@ -1059,7 +1097,7 @@ var _ = Describe("ORM", func() {
 				Relation("Translations.Comments").
 				First()
 			Expect(err).NotTo(HaveOccurred())
-			Expect(book).To(Equal(Book{
+			Expect(book).To(Equal(&Book{
 				Id:    100,
 				Title: "",
 				Author: Author{
@@ -1199,8 +1237,8 @@ var _ = Describe("ORM", func() {
 		})
 
 		It("works when there are no results", func() {
-			var book Book
-			err := db.Model(&book).
+			book := new(Book)
+			err := db.Model(book).
 				Column("book.*").
 				Relation("Author").
 				Relation("Genres").
@@ -1211,15 +1249,17 @@ var _ = Describe("ORM", func() {
 		})
 
 		It("supports overriding", func() {
-			var book BookWithCommentCount
-			err := db.Model(&book).
+			book := new(BookWithCommentCount)
+			err := db.Model(book).
 				Column("book.id").
 				Relation("Author").
 				Relation("Genres").
-				ColumnExpr(`(SELECT COUNT(*) FROM comments WHERE trackable_type = 'Book' AND trackable_id = book.id) AS comment_count`).
+				ColumnExpr(`(SELECT COUNT(*) FROM comments
+					WHERE trackable_type = 'Book' AND
+					trackable_id = book.id) AS comment_count`).
 				First()
 			Expect(err).NotTo(HaveOccurred())
-			Expect(book).To(Equal(BookWithCommentCount{
+			Expect(book).To(Equal(&BookWithCommentCount{
 				Book: Book{
 					Id:     100,
 					Author: Author{ID: 10, Name: "author 1", AvatarId: 1},
@@ -1706,5 +1746,79 @@ var _ = Describe("ORM", func() {
 			Select()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(book.Editor).To(BeNil())
+	})
+
+	Describe("ForEach", func() {
+		It("works with a struct ptr", func() {
+			q := db.Model((*Book)(nil)).
+				Order("id ASC")
+
+			var books []Book
+			err := q.Select(&books)
+			Expect(err).NotTo(HaveOccurred())
+
+			var count int
+			err = q.ForEach(func(b *Book) error {
+				book := &books[count]
+				Expect(book).To(Equal(b))
+				count++
+				return nil
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(count).To(Equal(3))
+		})
+
+		It("works with a struct", func() {
+			q := db.Model((*Book)(nil)).
+				Order("id ASC")
+
+			var books []Book
+			err := q.Select(&books)
+			Expect(err).NotTo(HaveOccurred())
+
+			var count int
+			err = q.ForEach(func(b Book) error {
+				book := &books[count]
+				Expect(book).To(Equal(&b))
+				count++
+				return nil
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(count).To(Equal(3))
+		})
+
+		It("works with a model", func() {
+			q := db.Model((*Book)(nil)).
+				Order("id ASC")
+
+			var count int
+			err := q.ForEach(func(_ orm.Discard) error {
+				count++
+				return nil
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(count).To(Equal(3))
+		})
+
+		It("works with scalars", func() {
+			q := db.Model((*Book)(nil)).
+				ColumnExpr("id, title").
+				Order("id ASC")
+
+			var books []Book
+			err := q.Select(&books)
+			Expect(err).NotTo(HaveOccurred())
+
+			var count int
+			err = q.ForEach(func(id int, title string) error {
+				book := &books[count]
+				Expect(id).To(Equal(book.Id))
+				Expect(title).To(Equal(book.Title))
+				count++
+				return nil
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(count).To(Equal(3))
+		})
 	})
 })

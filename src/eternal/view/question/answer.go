@@ -1,6 +1,7 @@
 package question
 
 import (
+	"eternal/event"
 	"eternal/middleware"
 	questionModel "eternal/model/question"
 	"github.com/labstack/echo"
@@ -35,6 +36,10 @@ func UpvoteAnswer(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
+	event.Publish(event.KeyAnswerUpvote, event.AnswerUpvote{
+		AnswerID: answerID,
+		UserID:   userID,
+	})
 	return ctx.JSON(http.StatusOK, &VoteAnswerResult{
 		UpvoteCount:   upvoteCount,
 		DownvoteCount: downvoteCount,
@@ -61,6 +66,10 @@ func DownvoteAnswer(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
+	event.Publish(event.KeyAnswerDownvote, event.AnswerDownvote{
+		AnswerID: answerID,
+		UserID:   userID,
+	})
 	return ctx.JSON(http.StatusOK, &VoteAnswerResult{
 		UpvoteCount:   upvoteCount,
 		DownvoteCount: downvoteCount,

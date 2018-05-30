@@ -23,3 +23,10 @@ filemanager:
   type: local
   local:
     path: /tmp/files
+
+event:
+  amqp:
+    url: amqp://guest:guest@localhost:5672/
+    exchange: eternal.exchange
+    route_key: eternal.topic.#
+    consumer: eternal

@@ -27,7 +27,7 @@ func Init(sURL string) error {
 			if err != nil {
 				panic(err)
 			}
-
+			/* 打印SQL执行事件 */
 			fmt.Printf("\033[34m%s %s\n\033[0m", time.Since(event.StartTime), query)
 		})
 	}
