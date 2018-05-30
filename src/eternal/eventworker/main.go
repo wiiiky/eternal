@@ -10,8 +10,10 @@ import (
 	"os"
 )
 
+const APPNAME = "eventworker"
+
 func main() {
-	config.Init()
+	config.Init(APPNAME)
 	initLogging()
 	initDatabase()
 	initEvent()

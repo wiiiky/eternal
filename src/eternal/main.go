@@ -38,7 +38,7 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 }
 
 func main() {
-	config.Init()
+	config.Init(APPNAME)
 	initLogging()
 	initDatabase()
 	initEvent()
