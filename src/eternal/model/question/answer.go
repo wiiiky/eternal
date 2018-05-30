@@ -77,7 +77,7 @@ func UpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 	conn := db.Conn()
 	tx, err := conn.Begin()
 	if err != nil {
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 	defer tx.Rollback()
@@ -89,7 +89,7 @@ func UpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 		if err == pg.ErrNoRows {
 			return 0, 0, errors.ErrAnswerNotFound
 		}
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 
@@ -105,36 +105,36 @@ func UpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 	if err := tx.Select(&upvote); err == nil { /* “点赞“标签已经存在 */
 		return answer.UpvoteCount, answer.DownvoteCount, nil
 	} else if err != pg.ErrNoRows { /* 出错 */
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 
 	if err := tx.Select(&downvote); err == nil { /* 存在一个“踩“标签，删除它 */
 		if err := tx.Delete(&downvote); err != nil {
-			log.Error("SQL Error", err)
+			log.Error("SQL Error:", err)
 			return 0, 0, err
 		}
 		if _, err := tx.Model(&answer).Set("downvote_count = downvote_count - 1").WherePK().Returning("downvote_count").Update(); err != nil {
-			log.Error("SQL Error", err)
+			log.Error("SQL Error:", err)
 			return 0, 0, err
 		}
 	} else if err != pg.ErrNoRows { /* 出错 */
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 
 	if err := tx.Insert(&upvote); err != nil {
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 
 	if _, err := tx.Model(&answer).Set("upvote_count = upvote_count + 1").WherePK().Returning("upvote_count").Update(); err != nil {
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 	return answer.UpvoteCount, answer.DownvoteCount, nil
@@ -145,7 +145,7 @@ func UndoUpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 	conn := db.Conn()
 	tx, err := conn.Begin()
 	if err != nil {
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 	defer tx.Rollback()
@@ -157,7 +157,7 @@ func UndoUpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 		if err == pg.ErrNoRows {
 			return 0, 0, errors.ErrAnswerNotFound
 		}
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 
@@ -172,12 +172,12 @@ func UndoUpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 	}
 	if res.RowsAffected() > 0 { /* 删除成功 */
 		if _, err := tx.Model(&answer).Set("upvote_count = upvote_count - 1").WherePK().Returning("upvote_count").Update(); err != nil {
-			log.Error("SQL Error", err)
+			log.Error("SQL Error:", err)
 			return 0, 0, err
 		}
 	}
 	if err := tx.Commit(); err != nil {
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 
@@ -189,7 +189,7 @@ func DownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 	conn := db.Conn()
 	tx, err := conn.Begin()
 	if err != nil {
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 	defer tx.Rollback()
@@ -201,7 +201,7 @@ func DownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 		if err == pg.ErrNoRows {
 			return 0, 0, errors.ErrAnswerNotFound
 		}
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 
@@ -217,36 +217,36 @@ func DownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 	if err := tx.Select(&downvote); err == nil { /* “踩“已经存在 */
 		return answer.UpvoteCount, answer.DownvoteCount, nil
 	} else if err != pg.ErrNoRows { /* 出错 */
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 
 	if err := tx.Select(&upvote); err == nil { /* 存在一个“点赞“标签，删除“点赞“ */
 		if err := tx.Delete(&upvote); err != nil {
-			log.Error("SQL Error", err)
+			log.Error("SQL Error:", err)
 			return 0, 0, err
 		}
 		if _, err := tx.Model(&answer).Set("upvote_count = upvote_count - 1").WherePK().Returning("upvote_count").Update(); err != nil {
-			log.Error("SQL Error", err)
+			log.Error("SQL Error:", err)
 			return 0, 0, err
 		}
 	} else if err != pg.ErrNoRows { /* 出错 */
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 
 	if err := tx.Insert(&downvote); err != nil {
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 
 	if _, err := tx.Model(&answer).Set("downvote_count = downvote_count + 1").WherePK().Returning("downvote_count").Update(); err != nil {
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 	return answer.UpvoteCount, answer.DownvoteCount, nil
@@ -257,7 +257,7 @@ func UndoDownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 	conn := db.Conn()
 	tx, err := conn.Begin()
 	if err != nil {
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 	defer tx.Rollback()
@@ -269,7 +269,7 @@ func UndoDownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 		if err == pg.ErrNoRows {
 			return 0, 0, errors.ErrAnswerNotFound
 		}
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 
@@ -284,14 +284,73 @@ func UndoDownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 	}
 	if res.RowsAffected() > 0 { /* 删除成功 */
 		if _, err := tx.Model(&answer).Set("downvote_count = downvote_count - 1").WherePK().Returning("downvote_count").Update(); err != nil {
-			log.Error("SQL Error", err)
+			log.Error("SQL Error:", err)
 			return 0, 0, err
 		}
 	}
 	if err := tx.Commit(); err != nil {
-		log.Error("SQL Error", err)
+		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
 
 	return answer.UpvoteCount, answer.DownvoteCount, nil
+}
+
+/* 获取在指定时间内点赞次数 */
+func GetAnswerUpvoteCount(answerID string, startTime, endTime time.Time) (int, error) {
+	conn := db.Conn()
+	upvote := AnswerUpvote{}
+	count, err := conn.Model(&upvote).Where("answer_id = ? AND ctime > ? AND ctime < ?", answerID, startTime, endTime).CountEstimate(1000)
+	if err != nil {
+		log.Error("SQL Error:", err)
+	}
+	return count, err
+}
+
+/* 添加或者更新热门回答 */
+func UpsertHotAnswer(answerID string) error {
+	conn := db.Conn()
+	tx, err := conn.Begin()
+	if err != nil {
+		log.Error("SQL Error:", err)
+		return err
+	}
+	defer tx.Rollback()
+
+	answer := Answer{
+		ID: answerID,
+	}
+	if err := tx.Model(&answer).Column("Question", "Question.Topics").WherePK().Select(); err != nil {
+		if err != pg.ErrNoRows {
+			log.Error("SQL Error:", err)
+		}
+		return errors.ErrAnswerNotFound
+	}
+	for _, topic := range answer.Question.Topics {
+		hotAnswer := HotAnswer{}
+		err := tx.Model(&hotAnswer).Where("answer_id = ? AND question_id = ? AND topic_id = ?", answer.ID, answer.Question.ID, topic.ID).Select()
+		if err == nil {
+			_, err = tx.Model(&hotAnswer).Set("ctime = ?", time.Now()).WherePK().Update()
+			if err != nil {
+				log.Error("SQL Error:", err)
+				return err
+			}
+		} else if err == pg.ErrNoRows {
+			hotAnswer.AnswerID = answer.ID
+			hotAnswer.QuestionID = answer.Question.ID
+			hotAnswer.TopicID = topic.ID
+			if err := tx.Insert(&hotAnswer); err != nil {
+				log.Error("SQL Error:", err)
+				return err
+			}
+		} else {
+			log.Error("SQL Error:", err)
+			return err
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		log.Error("SQL Error:", err)
+		return err
+	}
+	return nil
 }

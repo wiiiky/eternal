@@ -7,7 +7,7 @@ eternal:
 	GOPATH=`pwd` go build -o $(BIN)/$@ $(SRC)/$@/main.go
 
 eventworker:
-	GOPATH=`pwd` go build -o $(BIN)/$@ $(SRC)/eternal/event/worker/*.go
+	GOPATH=`pwd` go build -o $(BIN)/$@ $(SRC)/eternal/$@/*.go
 
 fmt:
 	find $(SRC)/eternal -name '*.go'|xargs gofmt -w

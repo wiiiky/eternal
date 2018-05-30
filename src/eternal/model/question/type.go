@@ -65,7 +65,7 @@ type HotAnswer struct {
 	Question     *Question               `json:"question"`
 	Topic        *Topic                  `json:"topic"`
 	CTime        time.Time               `sql:"ctime,null" json:"ctime"`
-	Relationship *UserAnswerRelationship `json:"relationship"`
+	Relationship *UserAnswerRelationship `sql:"-" json:"relationship"`
 }
 
 type AnswerUpvote struct {

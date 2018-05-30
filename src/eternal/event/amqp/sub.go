@@ -85,11 +85,11 @@ func (s *Subscriber) Run() {
 		routeKey := notify.RoutingKey
 		body := notify.Body
 		handler := handlers[routeKey]
-		log.Infof("AMQP Receive %s", routeKey)
 		if handler == nil {
 			log.Warnf("AMQP Unknown Key %s", routeKey)
 			notify.Ack(false)
 		} else {
+			log.Infof("AMQP Receive %s", routeKey)
 			notify.Ack(handler(routeKey, body))
 		}
 	}

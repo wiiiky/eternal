@@ -101,6 +101,7 @@ CREATE TABLE answer_upvote(
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY(user_id, answer_id)
 );
+CREATE INDEX answer_upvote__ctime ON answer_upvote(ctime);
 
 CREATE TABLE answer_downvote(
   user_id UUID NOT NULL,
@@ -108,6 +109,7 @@ CREATE TABLE answer_downvote(
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY(user_id, answer_id)
 );
+CREATE INDEX answer_downvote__ctime ON answer_downvote(ctime);
 
 CREATE TABLE file(
   id VARCHAR(64) NOT NULL,
@@ -123,7 +125,7 @@ CREATE TABLE file(
  */
 CREATE TABLE hot_answer(
 	id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
-	answer_id UUID NOT NULL, -- 回答ID
+	answer_id UUID PRIMARY KEY NOT NULL, -- 回答ID
 	question_id UUID NOT NULL, -- 所属问题
 	topic_id UUID NOT NULL, -- 所属话题,
 	ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
