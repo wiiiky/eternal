@@ -8,6 +8,21 @@ import (
 	"time"
 )
 
+func GetAnswer(answerID string) (*Answer, error) {
+	conn := db.Conn()
+	answer := Answer{
+		ID: answerID,
+	}
+	if err := conn.Select(&answer); err != nil {
+		if err == pg.ErrNoRows {
+			return nil, nil
+		}
+		log.Error("SQL Error:", err)
+		return nil, err
+	}
+	return &answer, nil
+}
+
 /* 获取问题下的回答 */
 func GetQuestionAnswers(userID, questionID string, page, limit int) ([]*Answer, error) {
 	conn := db.Conn()
@@ -299,8 +314,17 @@ func UndoDownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 /* 获取在指定时间内点赞次数 */
 func GetAnswerUpvoteCount(answerID string, startTime, endTime time.Time) (int, error) {
 	conn := db.Conn()
-	upvote := AnswerUpvote{}
-	count, err := conn.Model(&upvote).Where("answer_id = ? AND ctime > ? AND ctime < ?", answerID, startTime, endTime).CountEstimate(1000)
+	count, err := conn.Model((*AnswerUpvote)(nil)).Where("answer_id = ? AND ctime > ? AND ctime < ?", answerID, startTime, endTime).CountEstimate(1000)
+	if err != nil {
+		log.Error("SQL Error:", err)
+	}
+	return count, err
+}
+
+/* 获取在指定时间内的踩次数 */
+func GetAnswerDownvoteCount(answerID string, startTime, endTime time.Time) (int, error) {
+	conn := db.Conn()
+	count, err := conn.Model((*AnswerDownvote)(nil)).Where("answer_id = ? AND ctime > ? AND ctime < ?", answerID, startTime, endTime).CountEstimate(1000)
 	if err != nil {
 		log.Error("SQL Error:", err)
 	}
@@ -326,6 +350,11 @@ func UpsertHotAnswer(answerID string) error {
 		}
 		return errors.ErrAnswerNotFound
 	}
+	/* 删除同一个问题下其他的热门回答，同一个问题只能有一个热门回答 */
+	if _, err := tx.Model((*HotAnswer)(nil)).Where("question_id = ?", answer.Question.ID).Delete(); err != nil {
+		log.Error("SQL Error:", err)
+		return err
+	}
 	for _, topic := range answer.Question.Topics {
 		hotAnswer := HotAnswer{}
 		err := tx.Model(&hotAnswer).Where("answer_id = ? AND question_id = ? AND topic_id = ?", answer.ID, answer.Question.ID, topic.ID).Select()
@@ -349,6 +378,17 @@ func UpsertHotAnswer(answerID string) error {
 		}
 	}
 	if err := tx.Commit(); err != nil {
+		log.Error("SQL Error:", err)
+		return err
+	}
+	return nil
+}
+
+/* 删除热门回答 */
+func DeleteHotAnswer(answerID string) error {
+	conn := db.Conn()
+
+	if _, err := conn.Model((*HotAnswer)(nil)).Where("answer_id = ?", answerID).Delete(); err != nil {
 		log.Error("SQL Error:", err)
 		return err
 	}

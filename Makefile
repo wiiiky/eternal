@@ -1,7 +1,10 @@
-.PHONY: eternal, eventworker, fmt, clean
+.PHONY: all, eternal, eventworker, fmt, clean
 
 SRC=./src
 BIN=./bin
+
+all: eternal eventworker
+
 
 eternal:
 	GOPATH=`pwd` go build -o $(BIN)/$@ $(SRC)/$@/main.go
