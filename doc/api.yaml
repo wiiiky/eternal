@@ -161,6 +161,48 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Question"
+  /questions:
+    get:
+      tags:
+        - question
+      summary: 搜索问题
+      description: 搜索问题
+      operationId: findQuestions
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          allowEmptyValue: false
+          description: 搜索关键字
+          example: 大学
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+          allowEmptyValue: false
+          description: 分页
+          example: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: string
+          allowEmptyValue: false
+          description: 返回数据数，默认为10
+          example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  $ref: "#/components/schemas/Question"
   /answer/{id}/upvote:
     post:
       tags:
@@ -259,7 +301,7 @@ paths:
       description: 搜索话题
       operationId: findTopics
       parameters:
-        - name: q
+        - name: query
           in: query
           required: true
           schema:
@@ -267,6 +309,14 @@ paths:
           allowEmptyValue: false
           description: 搜索关键字
           example: 大学
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+          allowEmptyValue: false
+          description: 分页
+          example: 1
         - name: limit
           in: query
           required: false

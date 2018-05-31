@@ -37,3 +37,22 @@ func CreateQuestion(ctx echo.Context) error {
 	}
 	return ctx.JSON(http.StatusOK, question)
 }
+
+/* 搜索问题 */
+func FindQuestions(ctx echo.Context) error {
+	data := SearchQuestionRequest{
+		Page:  1,
+		Limit: 10,
+	}
+	if err := ctx.Bind(&data); err != nil {
+		return err
+	}
+	if err := ctx.Validate(&data); err != nil {
+		return err
+	}
+	questions, err := questionModel.FindQuestions(data.Query, data.Page, data.Limit)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(http.StatusOK, questions)
+}

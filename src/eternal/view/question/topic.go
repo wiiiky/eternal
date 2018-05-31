@@ -7,7 +7,9 @@ import (
 )
 
 func FindTopics(ctx echo.Context) error {
-	data := SearchTopicRequest{}
+	data := SearchTopicRequest{
+		Limit: 10,
+	}
 	if err := ctx.Bind(&data); err != nil {
 		return err
 	}

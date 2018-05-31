@@ -71,6 +71,7 @@ func main() {
 		authApi.GET("/topics", questionView.FindTopics)
 		// 问题相关
 		authApi.POST("/question", questionView.CreateQuestion)
+		authApi.GET("/questions", questionView.FindQuestions)
 		authApi.GET("/question/:id", questionView.GetQuestion)
 		authApi.GET("/question/:qid/answers", questionView.GetQuestionAnswers)
 

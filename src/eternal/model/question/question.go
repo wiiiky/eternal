@@ -23,6 +23,18 @@ func GetQuestion(id string) (*Question, error) {
 	return &question, nil
 }
 
+/* 搜索问题 */
+func FindQuestions(query string, page, limit int) ([]*Question, error) {
+	conn := db.Conn()
+
+	questions := make([]*Question, 0)
+	if err := conn.Model(&questions).Where("title LIKE ?", "%"+query+"%").Offset((page - 1) * limit).Limit(limit).Order("ctime DESC").Select(); err != nil {
+		log.Error("SQL Error:", err)
+		return nil, err
+	}
+	return questions, nil
+}
+
 /* 创建问题 */
 func CreateQuestion(userID, title string, topicIDs []string, content string) (*Question, error) {
 	tx, err := db.Conn().Begin()

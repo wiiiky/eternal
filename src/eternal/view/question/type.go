@@ -6,8 +6,14 @@ type VoteAnswerResult struct {
 }
 
 type SearchTopicRequest struct {
-	Query string `query:"q" validate:"required"`
-	Limit int    `query:"limit" validate:"default=10"`
+	Query string `query:"query" validate:"required"`
+	Limit int    `query:"limit" validate:"gte=1"`
+}
+
+type SearchQuestionRequest struct {
+	Query string `query:"query" validate:"required"`
+	Limit int    `query:"limit" validate:"gte=1"`
+	Page  int    `query:"page" validate:"gte=1"`
 }
 
 type CreateQuestionRequest struct {
