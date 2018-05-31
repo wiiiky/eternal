@@ -20,6 +20,7 @@ func GetUserProfile(ctx echo.Context) error {
 	}
 }
 
+/* 更新用户的封面图 */
 func UpdateUserCover(ctx echo.Context) error {
 	data := UpdateCoverRequest{}
 	if err := ctx.Bind(&data); err != nil {

@@ -18,3 +18,39 @@ func Init(APPNAME string) {
 	}
 	viper.SetDefault("debug", true)
 }
+
+func GetString(key string) string {
+	return viper.GetString(key)
+}
+
+func GetStringSlice(key string) []string {
+	return viper.GetStringSlice(key)
+}
+
+func GetBool(key string) bool {
+	return viper.GetBool(key)
+}
+
+func GetInt(key string) int {
+	return viper.GetInt(key)
+}
+
+func GetStringDefault(key, def string) string {
+	viper.SetDefault(key, def)
+	return viper.GetString(key)
+}
+
+func GetIntDefault(key string, def int) int {
+	viper.SetDefault(key, def)
+	return viper.GetInt(key)
+}
+
+func GetStringSliceDefault(key string, def []string) []string {
+	viper.SetDefault(key, def)
+	return viper.GetStringSlice(key)
+}
+
+func GetBoolDefault(key string, def bool) bool {
+	viper.SetDefault(key, def)
+	return viper.GetBool(key)
+}

@@ -6,7 +6,6 @@ import (
 	"eternal/logging"
 	"eternal/model/db"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"os"
 )
 
@@ -25,26 +24,27 @@ func main() {
 }
 
 func initEvent() {
-	viper.SetDefault("event.amqp.consumer", "eternal")
-	amqpURL := viper.GetString("event.amqp.url")
-	amqpExchange := viper.GetString("event.amqp.exchange")
-	amqpRouteKey := viper.GetString("event.amqp.route_key")
-	amqpQueue := viper.GetString("event.amqp.queue")
-	amqpConsumer := viper.GetString("event.amqp.consumer")
+	amqpURL := config.GetString("event.amqp.url")
+	amqpExchange := config.GetString("event.amqp.exchange")
+	amqpRouteKey := config.GetString("event.amqp.route_key")
+	amqpQueue := config.GetString("event.amqp.queue")
+	amqpConsumer := config.GetStringDefault("event.amqp.consumer", "eventworker")
 	event.InitSub(amqpURL, amqpExchange, amqpQueue, amqpRouteKey, amqpConsumer)
 }
 
 func initLogging() {
-	viper.SetDefault("log.format", "json")
-	viper.SetDefault("log.level", "info")
-	viper.SetDefault("log.output", "stdout")
+	format := config.GetStringDefault("log.format", "json")
+	level := config.GetStringDefault("log.level", "info")
+	output := config.GetStringDefault("log.output", "stdout")
 
-	logging.Init(viper.GetString("log.format"), viper.GetString("log.level"), viper.GetString("log.output"))
+	logging.Init(format, level, output)
 }
 
 func initDatabase() {
-	dbURL := viper.GetString("database.url")
-	if err := db.Init(dbURL); err != nil {
+	dbURL := config.GetString("database.url")
+	if dbURL == "" {
+		log.Fatal("**CONFIG** database.url not found")
+	} else if err := db.Init(dbURL); err != nil {
 		log.Fatal("Connecting database failed:", err)
 	}
 }

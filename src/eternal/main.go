@@ -20,7 +20,6 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/middleware"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"net/http"
 	"os"
 	"os/signal"
@@ -95,55 +94,55 @@ func errorHandler(err error, c echo.Context) {
  * https://github.com/sirupsen/logrus
  */
 func initLogging() {
-	viper.SetDefault("log.format", "json")
-	viper.SetDefault("log.level", "info")
-	viper.SetDefault("log.output", "stdout")
+	format := config.GetStringDefault("log.format", "json")
+	level := config.GetStringDefault("log.level", "info")
+	output := config.GetStringDefault("log.output", "stdout")
 
-	logging.Init(viper.GetString("log.format"), viper.GetString("log.level"), viper.GetString("log.output"))
+	logging.Init(format, level, output)
 }
 
 /* 初始化数据库 */
 func initDatabase() {
-	dbURL := viper.GetString("database.url")
-	if err := db.Init(dbURL); err != nil {
+	dbURL := config.GetString("database.url")
+	if dbURL == "" {
+		log.Fatal("**CONFIG** database.url not found")
+	} else if err := db.Init(dbURL); err != nil {
 		log.Fatal("Connecting database failed:", err)
 	}
 }
 
 func initEvent() {
-	amqpURL := viper.GetString("event.amqp.url")
-	amqpExchange := viper.GetString("event.amqp.exchange")
-	amqpRouteKey := viper.GetString("event.amqp.route_key")
+	amqpURL := config.GetString("event.amqp.url")
+	if amqpURL == "" {
+		log.Fatal("**CONFIG** event.amqp.url not found")
+	}
+	amqpExchange := config.GetString("event.amqp.exchange")
+	if amqpExchange == "" {
+		log.Fatal("**CONFIG** event.amqp.exchange not found")
+	}
+	amqpRouteKey := config.GetString("event.amqp.route_key")
+	if amqpRouteKey == "" {
+		log.Fatal("**CONFIG** event.amqp.route_key not found")
+	}
 	event.InitPub(amqpURL, amqpExchange, amqpRouteKey)
 }
 
 func initEcho(f func(*echo.Echo)) {
-	viper.SetDefault("http.cors.methods", []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE})
-	viper.SetDefault("http.cors.origins", []string{"*"})
-	viper.SetDefault("http.cors.credentials", false)
-
-	httpAddr := viper.GetString("http.addr")
-	allowOrigins := viper.GetStringSlice("http.cors.origins")
-	allowMethods := viper.GetStringSlice("http.cors.methods")
-	allowCredentials := viper.GetBool("http.cors.credentials")
-	sessionSecret := viper.GetString("http.session.secret")
+	httpAddr := config.GetString("http.addr")
 	if httpAddr == "" {
-		log.Fatal("Incomplete config. http.addr not found")
+		log.Fatal("**CONFIG** http.addr not found")
 	}
-	if len(allowOrigins) == 0 {
-		log.Fatal("Incomplete config. http.cors.origins not found")
-	}
-	if len(allowMethods) == 0 {
-		log.Fatal("Incomplete config. http.cors.methods not found")
-	}
+	allowOrigins := config.GetStringSliceDefault("http.cors.origins", []string{"*"})
+	allowMethods := config.GetStringSliceDefault("http.cors.methods", []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE})
+	allowCredentials := config.GetBoolDefault("http.cors.credentials", false)
+	sessionSecret := config.GetString("http.session.secret")
 	if sessionSecret == "" {
-		log.Fatal("Incomplete config. http.session.secret not found")
+		log.Fatal("**CONFIG** http.session.secret not found")
 	}
 
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.Use(middleware.RequestID())
 	e.Use(middleware.RequestID())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     allowOrigins,
