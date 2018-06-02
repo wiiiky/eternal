@@ -56,16 +56,15 @@ type UserAnswerRelationship struct {
 }
 
 type HotAnswer struct {
-	TableName    struct{}                `sql:"hot_answer" json:"-"`
-	ID           string                  `sql:"id,pk" json:"-"`
-	AnswerID     string                  `sql:"answer_id" json:"-"`
-	QuestionID   string                  `sql:"question_id" json:"-"`
-	TopicID      string                  `sql:"topic_id" json:"-"`
-	Answer       *Answer                 `json:"answer"`
-	Question     *Question               `json:"question"`
-	Topic        *Topic                  `json:"topic"`
-	CTime        time.Time               `sql:"ctime,null" json:"ctime"`
-	Relationship *UserAnswerRelationship `sql:"-" json:"relationship"`
+	TableName  struct{}  `sql:"hot_answer" json:"-"`
+	ID         string    `sql:"id,pk" json:"-"`
+	AnswerID   string    `sql:"answer_id" json:"-"`
+	QuestionID string    `sql:"question_id" json:"-"`
+	TopicID    string    `sql:"topic_id" json:"-"`
+	Answer     *Answer   `json:"answer"`
+	Question   *Question `json:"question"`
+	Topic      *Topic    `json:"topic"`
+	CTime      time.Time `sql:"ctime,null" json:"ctime"`
 }
 
 type AnswerUpvote struct {

@@ -23,6 +23,34 @@ func GetAnswer(answerID string) (*Answer, error) {
 	return &answer, nil
 }
 
+/* 获取用户和某个回答的关系 */
+func GetUserAnswerRelationship(userID, answerID string) (*UserAnswerRelationship, error) {
+	conn := db.Conn()
+	relationship := &UserAnswerRelationship{}
+	upvote := AnswerUpvote{
+		UserID:   userID,
+		AnswerID: answerID,
+	}
+	if err := conn.Select(&upvote); err == nil {
+		relationship.Upvoted = true
+		return relationship, nil
+	} else if err != pg.ErrNoRows {
+		log.Error("SQL Error:", err)
+		return nil, err
+	}
+	downvote := AnswerDownvote{
+		UserID:   userID,
+		AnswerID: answerID,
+	}
+	if err := conn.Select(&downvote); err == nil {
+		relationship.Downvoted = true
+	} else if err != pg.ErrNoRows {
+		log.Error("SQL Error:", err)
+		return nil, err
+	}
+	return relationship, nil
+}
+
 /* 获取问题下的回答 */
 func GetQuestionAnswers(userID, questionID string, page, limit int) ([]*Answer, error) {
 	conn := db.Conn()
@@ -34,6 +62,20 @@ func GetQuestionAnswers(userID, questionID string, page, limit int) ([]*Answer, 
 		return nil, err
 	}
 	return answers, nil
+}
+
+/* 获取问题的最热门回答 */
+func GetQuestionTopAnswer(questionID string) (*Answer, error) {
+	conn := db.Conn()
+	answer := Answer{}
+	err := conn.Model(&answer).Where("question_id = ?", questionID).Order("upvote_count DESC").Limit(1).Select()
+	if err == pg.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		log.Error("SQL Error:", err)
+		return nil, err
+	}
+	return &answer, nil
 }
 
 /* 获取热门回答 */
@@ -58,30 +100,6 @@ func FindHotAnswers(userID string, before string, limit int) ([]*HotAnswer, erro
 	if err != nil {
 		log.Error("SQL Error:", err)
 		return nil, err
-	}
-	for _, hotAnswer := range hotAnswers {
-		hotAnswer.Relationship = &UserAnswerRelationship{}
-		upvote := AnswerUpvote{
-			UserID:   userID,
-			AnswerID: hotAnswer.Answer.ID,
-		}
-		if err := conn.Select(&upvote); err == nil {
-			hotAnswer.Relationship.Upvoted = true
-			continue // 如果存在点赞，则不继续查询是否有"踩"
-		} else if err != pg.ErrNoRows {
-			log.Error("SQL Error:", err)
-			return nil, err
-		}
-		downvote := AnswerDownvote{
-			UserID:   userID,
-			AnswerID: hotAnswer.Answer.ID,
-		}
-		if err := conn.Select(&downvote); err == nil {
-			hotAnswer.Relationship.Downvoted = true
-		} else if err != pg.ErrNoRows {
-			log.Error("SQL Error:", err)
-			return nil, err
-		}
 	}
 
 	return hotAnswers, nil

@@ -8,11 +8,12 @@ import (
 	"net/http"
 )
 
+/* 获取问题的详细信息 */
 func GetQuestion(ctx echo.Context) error {
 	questionID := ctx.Param("id")
 	question, err := questionModel.GetQuestion(questionID)
 	if err != nil {
-		return nil
+		return err
 	} else if question == nil {
 		return errors.ErrQuestionNotFound
 	}
@@ -40,6 +41,7 @@ func CreateQuestion(ctx echo.Context) error {
 
 /* 搜索问题 */
 func FindQuestions(ctx echo.Context) error {
+	userID := ctx.Get(middleware.CTX_KEY_ACCOUNT_ID).(string)
 	data := SearchQuestionRequest{
 		Page:  1,
 		Limit: 10,
@@ -54,5 +56,21 @@ func FindQuestions(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return ctx.JSON(http.StatusOK, questions)
+	results := make([]*QuestionWithTopAnswer, 0)
+	for _, question := range questions {
+		topAnswer, err := questionModel.GetQuestionTopAnswer(question.ID)
+		if err != nil {
+			return err
+		}
+		var relationship *questionModel.UserAnswerRelationship
+		if topAnswer != nil {
+			relationship, err = questionModel.GetUserAnswerRelationship(userID, topAnswer.ID)
+		}
+		results = append(results, &QuestionWithTopAnswer{
+			Question:               question,
+			TopAnswer:              topAnswer,
+			UserAnswerRelationship: relationship,
+		})
+	}
+	return ctx.JSON(http.StatusOK, results)
 }

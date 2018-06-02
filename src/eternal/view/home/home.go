@@ -4,6 +4,7 @@ import (
 	"eternal/middleware"
 	questionModel "eternal/model/question"
 	"github.com/labstack/echo"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -19,9 +20,18 @@ func GetHotAnswers(ctx echo.Context) error {
 	if err := ctx.Validate(&data); err != nil {
 		return err
 	}
-	answers, err := questionModel.FindHotAnswers(userID, data.Before, data.Limit)
+	hotAnswers, err := questionModel.FindHotAnswers(userID, data.Before, data.Limit)
 	if err != nil {
 		return err
 	}
-	return ctx.JSON(http.StatusOK, answers)
+	results := make([]*HotAnswer, 0)
+	for _, hotAnswer := range hotAnswers {
+		relationship, err := questionModel.GetUserAnswerRelationship(userID, hotAnswer.Answer.ID)
+		if err != nil {
+			log.Error("GetUserAnswerRelationship failed:", err)
+			return err
+		}
+		results = append(results, &HotAnswer{HotAnswer: hotAnswer, UserAnswerRelationship: relationship})
+	}
+	return ctx.JSON(http.StatusOK, results)
 }

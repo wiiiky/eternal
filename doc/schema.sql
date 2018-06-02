@@ -94,6 +94,8 @@ CREATE TABLE answer (
 );
 CREATE INDEX answer__question_id ON answer(question_id);
 CREATE INDEX answer__user_id ON answer(user_id);
+CREATE INDEX answer__upvote_count ON answer(upvote_count);
+CREATE INDEX answer__downvote_count ON answer(downvote_count);
 
 CREATE TABLE answer_upvote(
   user_id UUID NOT NULL,
