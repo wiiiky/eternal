@@ -133,6 +133,7 @@ for i in range(10):
             save_answer(pk, a['content'], a['excerpt'])
         print(title)
 
+# 添加热门回答
 cur.execute('''
 INSERT INTO hot_answer (question_id, answer_id, topic_id)
     SELECT DISTINCT question.id, answer.id, question_topic.topic_id
