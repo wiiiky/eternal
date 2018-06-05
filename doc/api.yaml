@@ -24,6 +24,10 @@ tags:
     description: 主页
   - name: question
     description: 问题
+  - name: answer
+    description: 回答
+  - name: topic
+    description: 话题
 
 paths:
   /home/hot/answers:
@@ -141,6 +145,23 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/File"
+  /file/{id}:
+    post:
+      tags:
+        - file
+      summary: 下载文件
+      description: 根据文件ID下载文件
+      operationId: downloadFile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 文件ID
+      responses:
+        '200':
+          description: OK，Content-Type根据文件类型而定
   /question:
     post:
       tags:
@@ -202,11 +223,11 @@ paths:
                 type: array
                 items:
                   type: object
-                  $ref: "#/components/schemas/Question"
+                  $ref: "#/components/schemas/QuestionWithTopAnswer"
   /answer/{id}/upvote:
     post:
       tags:
-        - question
+        - answer
       summary: 点赞回答
       description: 点赞回答
       operationId: upvoteAnswer
@@ -228,7 +249,7 @@ paths:
                 $ref: "#/components/schemas/VoteAnswerResult"
     delete:
       tags:
-        - question
+        - answer
       summary: 取消点赞
       description: 取消点赞
       operationId: undoUpvoteAnwser
@@ -251,7 +272,7 @@ paths:
   /answer/{id}/downvote:
     post:
       tags:
-        - question
+        - answer
       summary: 踩回答
       description: 踩回答
       operationId: downvoteAnswer
@@ -273,7 +294,7 @@ paths:
                 $ref: "#/components/schemas/VoteAnswerResult"
     delete:
       tags:
-        - question
+        - answer
       summary: 取消踩
       description: 取消踩
       operationId: undoDownvoteAnwser
@@ -296,7 +317,7 @@ paths:
   /topics:
     get:
       tags:
-        - question
+        - topic
       summary: 搜索话题
       description: 搜索话题
       operationId: findTopics
@@ -335,23 +356,6 @@ paths:
                 items:
                   type: object
                   $ref: "#/components/schemas/Topic"
-  /file/{id}:
-    post:
-      tags:
-        - file
-      summary: 下载文件
-      description: 根据文件ID下载文件
-      operationId: downloadFile
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: 文件ID
-      responses:
-        '200':
-          description: OK，Content-Type根据文件类型而定
 
 components:
   schemas:
@@ -543,6 +547,9 @@ components:
         question:
           type: object
           $ref: "#/components/schemas/Question"
+        user_answer_relationship:
+          type: object
+          $ref: "#/components/schemas/UserAnswerRelationship"
     VoteAnswerResult:
       type: object
       description: 点赞/踩回答的结果
@@ -633,3 +640,28 @@ components:
           format: date-time
           description: 更新时间
           example: "2018-05-17T18:13:12.677426638+08:00"
+    UserAnswerRelationship:
+      type: object
+      description: 用户和回答的关系
+      properties:
+        upvoted:
+          type: boolean
+          description: 是否赞同
+          example: true
+        downvoted:
+          type: boolean
+          description: 是否不赞同
+          example: false
+    QuestionWithTopAnswer:
+      type: object
+      description: 问题已经问题相关的热门回答
+      properties:
+        question:
+          type: object
+          $ref: "#/components/schemas/Question"
+        answer:
+          type: object
+          $ref: "#/components/schemas/Answer"
+        user_answer_relationship:
+          type: object
+          $ref: "#/components/schemas/UserAnswerRelationship"
