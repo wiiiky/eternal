@@ -56,7 +56,7 @@ func GetQuestionAnswers(userID, questionID string, page, limit int) ([]*Answer, 
 	conn := db.Conn()
 	answers := make([]*Answer, 0)
 
-	err := conn.Model(&answers).Column("User").Where("question_id = ?", questionID).Offset((page - 1) * limit).Limit(limit).Select()
+	err := conn.Model(&answers).Column("User").Where("question_id = ?", questionID).Order("upvote_count DESC").Offset((page - 1) * limit).Limit(limit).Select()
 	if err != nil {
 		log.Error("SQL Error:", err)
 		return nil, err
