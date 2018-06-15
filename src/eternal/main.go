@@ -111,6 +111,7 @@ func initDatabase() {
 	}
 }
 
+/* 初始化事件发布模块 */
 func initEvent() {
 	amqpURL := config.GetString("event.amqp.url")
 	if amqpURL == "" {
@@ -136,12 +137,19 @@ func initEcho(f func(*echo.Echo)) {
 	allowMethods := config.GetStringSliceDefault("http.cors.methods", []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE})
 	allowCredentials := config.GetBoolDefault("http.cors.credentials", false)
 	sessionSecret := config.GetString("http.session.secret")
+	accessLog := config.GetStringDefault("http.access_log", "stdout")
 	if sessionSecret == "" {
 		log.Fatal("**CONFIG** http.session.secret not found")
 	}
 
 	e := echo.New()
-	e.Use(middleware.Logger())
+	accessLogWriter, err := logging.OpenLogFile(accessLog)
+	if err != nil {
+		log.Fatalf("**LOG** open %s failed: %s", accessLog, err)
+	}
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Output: accessLogWriter,
+	}))
 	e.Use(middleware.Recover())
 	e.Use(middleware.RequestID())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -157,7 +165,7 @@ func initEcho(f func(*echo.Echo)) {
 
 	go func() {
 		if err := e.Start(httpAddr); err != nil {
-			e.Logger.Info("shutting down the server")
+			log.Info("shutting down the server")
 		}
 	}()
 	quit := make(chan os.Signal)

@@ -6,6 +6,19 @@ import (
 	"os"
 )
 
+func OpenLogFile(filename string) (io.Writer, error) {
+	var f io.Writer
+	var err error
+	if filename == "stdout" {
+		f = os.Stdout
+	} else if filename == "stderr" {
+		f = os.Stderr
+	} else {
+		f, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	}
+	return f, err
+}
+
 func Init(format, level, output string) {
 	allFormatters := map[string]log.Formatter{
 		"json": &log.JSONFormatter{},
@@ -31,15 +44,7 @@ func Init(format, level, output string) {
 	}
 	log.SetLevel(lvel)
 
-	var f io.Writer
-	var err error
-	if output == "stdout" {
-		f = os.Stdout
-	} else if output == "stderr" {
-		f = os.Stderr
-	} else {
-		f, err = os.OpenFile(output, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	}
+	f, err := OpenLogFile(output)
 	if err != nil {
 		panic(err)
 	}

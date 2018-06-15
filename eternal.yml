@@ -10,6 +10,7 @@ http:
     credentials: true
   session:
     secret: xGKCAxcCbUZyM3GayitHcQJz9HHnDNKk
+  access_log: stdout
 
 log:
   format: json
