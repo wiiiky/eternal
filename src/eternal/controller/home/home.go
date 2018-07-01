@@ -1,15 +1,15 @@
 package home
 
 import (
-	"eternal/middleware"
+	"eternal/controller/context"
 	questionModel "eternal/model/question"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
-func GetHotAnswers(ctx echo.Context) error {
-	userID := ctx.Get(middleware.CTX_KEY_ACCOUNT_ID).(string)
+func GetHotAnswers(c echo.Context) error {
+	ctx := c.(*context.Context)
 	data := HotAnswerPageData{
 		Before: "",
 		Limit:  10,
@@ -20,6 +20,7 @@ func GetHotAnswers(ctx echo.Context) error {
 	if err := ctx.Validate(&data); err != nil {
 		return err
 	}
+	userID := ctx.Account.ID
 	hotAnswers, err := questionModel.FindHotAnswers(userID, data.Before, data.Limit)
 	if err != nil {
 		return err

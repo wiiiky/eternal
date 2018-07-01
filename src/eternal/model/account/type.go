@@ -37,6 +37,7 @@ type Token struct {
 	TableName struct{}  `sql:"token" json:"-"`
 	ID        string    `sql:"id" json:"id"`
 	UserID    string    `sql:"user_id" json:"user_id"`
+	ClientID  string    `sql:"client_id" json:"client_id"`
 	CTime     time.Time `sql:"ctime" json:"ctime"`
 }
 

@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-const APPNAME = "eventworker"
+const APPNAME = "eworker"
 
 func main() {
 	config.Init(APPNAME)
@@ -28,7 +28,7 @@ func initEvent() {
 	amqpExchange := config.GetString("event.amqp.exchange")
 	amqpRouteKey := config.GetString("event.amqp.route_key")
 	amqpQueue := config.GetString("event.amqp.queue")
-	amqpConsumer := config.GetStringDefault("event.amqp.consumer", "eventworker")
+	amqpConsumer := config.GetStringDefault("event.amqp.consumer", "eworker")
 	event.InitSub(amqpURL, amqpExchange, amqpQueue, amqpRouteKey, amqpConsumer)
 }
 

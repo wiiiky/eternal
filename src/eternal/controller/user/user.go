@@ -1,16 +1,16 @@
 package user
 
 import (
+	"eternal/controller/context"
 	"eternal/errors"
-	accountModel "eternal/model/account"
 	userModel "eternal/model/user"
 	"github.com/labstack/echo"
 	"net/http"
 )
 
-func GetUserProfile(ctx echo.Context) error {
-	a := ctx.Get("account").(*accountModel.Account)
-	up, err := userModel.GetUserProfile(a.ID)
+func GetUserProfile(c echo.Context) error {
+	ctx := c.(*context.Context)
+	up, err := userModel.GetUserProfile(ctx.Account.ID)
 	if err != nil {
 		return err
 	} else if up == nil {
@@ -21,7 +21,8 @@ func GetUserProfile(ctx echo.Context) error {
 }
 
 /* 更新用户的封面图 */
-func UpdateUserCover(ctx echo.Context) error {
+func UpdateUserCover(c echo.Context) error {
+	ctx := c.(*context.Context)
 	data := UpdateCoverRequest{}
 	if err := ctx.Bind(&data); err != nil {
 		return err
@@ -29,9 +30,8 @@ func UpdateUserCover(ctx echo.Context) error {
 	if err := ctx.Validate(data); err != nil {
 		return err
 	}
-	a := ctx.Get("account").(*accountModel.Account)
 
-	up, err := userModel.UpdateUserCover(a.ID, data.Cover)
+	up, err := userModel.UpdateUserCover(ctx.Account.ID, data.Cover)
 	if err != nil {
 		return err
 	}

@@ -1,8 +1,8 @@
 package question
 
 import (
+	"eternal/controller/context"
 	"eternal/errors"
-	"eternal/middleware"
 	questionModel "eternal/model/question"
 	"github.com/labstack/echo"
 	"net/http"
@@ -20,8 +20,8 @@ func GetQuestion(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, question)
 }
 
-func CreateQuestion(ctx echo.Context) error {
-	userID := ctx.Get(middleware.CTX_KEY_ACCOUNT_ID).(string)
+func CreateQuestion(c echo.Context) error {
+	ctx := c.(*context.Context)
 	data := CreateQuestionRequest{}
 	if err := ctx.Bind(&data); err != nil {
 		return err
@@ -30,7 +30,7 @@ func CreateQuestion(ctx echo.Context) error {
 		return err
 	}
 
-	question, err := questionModel.CreateQuestion(userID, data.Title, data.Topics, data.Content)
+	question, err := questionModel.CreateQuestion(ctx.Account.ID, data.Title, data.Topics, data.Content)
 	if err != nil {
 		return err
 	} else if question == nil {
@@ -40,8 +40,9 @@ func CreateQuestion(ctx echo.Context) error {
 }
 
 /* 搜索问题 */
-func FindQuestions(ctx echo.Context) error {
-	userID := ctx.Get(middleware.CTX_KEY_ACCOUNT_ID).(string)
+func FindQuestions(c echo.Context) error {
+	ctx := c.(*context.Context)
+	userID := ctx.Account.ID
 	data := SearchQuestionRequest{
 		Page:  1,
 		Limit: 10,

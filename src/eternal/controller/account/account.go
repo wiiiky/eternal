@@ -1,6 +1,7 @@
 package account
 
 import (
+	"eternal/controller/context"
 	"eternal/errors"
 	accountModel "eternal/model/account"
 	"github.com/gorilla/sessions"
@@ -19,8 +20,8 @@ func GetSupportedCountries(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, countries)
 }
 
-func login(ctx echo.Context, a *accountModel.Account) error {
-	tk, err := accountModel.UpsertToken(a.ID)
+func login(ctx *context.Context, a *accountModel.Account) error {
+	tk, err := accountModel.UpsertToken(a.ID, ctx.Client.ID)
 	if err != nil {
 		return err
 	}
@@ -36,7 +37,8 @@ func login(ctx echo.Context, a *accountModel.Account) error {
 }
 
 /* 登录 */
-func Login(ctx echo.Context) error {
+func Login(c echo.Context) error {
+	ctx := c.(*context.Context)
 	data := LoginRequest{}
 	if err := ctx.Bind(&data); err != nil {
 		return err
@@ -58,10 +60,10 @@ func Login(ctx echo.Context) error {
 	return login(ctx, a)
 }
 
-func Logout(ctx echo.Context) error {
-	a := ctx.Get("account").(*accountModel.Account)
+func Logout(c echo.Context) error {
+	ctx := c.(*context.Context)
 
-	if err := accountModel.DeleteToken(a.ID); err != nil {
+	if err := accountModel.DeleteToken(ctx.Account.ID, ctx.Client.ID); err != nil {
 		return err
 	}
 
@@ -72,7 +74,8 @@ func Logout(ctx echo.Context) error {
 }
 
 /* 注册 */
-func Signup(ctx echo.Context) error {
+func Signup(c echo.Context) error {
+	ctx := c.(*context.Context)
 	data := SignupRequest{}
 	if err := ctx.Bind(&data); err != nil {
 		return err
@@ -105,7 +108,7 @@ func Signup(ctx echo.Context) error {
 }
 
 /* 获取帐号信息 */
-func GetAccountInfo(ctx echo.Context) error {
-	a := ctx.Get("account").(*accountModel.Account)
-	return ctx.JSON(http.StatusOK, a)
+func GetAccountInfo(c echo.Context) error {
+	ctx := c.(*context.Context)
+	return ctx.JSON(http.StatusOK, ctx.Account)
 }

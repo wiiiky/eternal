@@ -1,0 +1,17 @@
+
+debug: true
+
+log:
+  format: json
+  level: debug
+  output: stdout
+
+database:
+  url: postgres://postgres@127.0.0.1/eternal?sslmode=disable
+
+event:
+  amqp:
+    url: amqp://guest:guest@localhost:5672/
+    exchange: eternal.exchange
+    route_key: eternal.topic.#
+    consumer: eworker

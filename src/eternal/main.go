@@ -3,18 +3,12 @@ package main
 import (
 	"context"
 	"eternal/config"
+	"eternal/controller"
 	"eternal/errors"
 	"eternal/event"
 	"eternal/filemanager"
 	"eternal/logging"
-	cmiddleware "eternal/middleware"
 	"eternal/model/db"
-	accountView "eternal/view/account"
-	fileView "eternal/view/file"
-	homeView "eternal/view/home"
-	questionView "eternal/view/question"
-	userView "eternal/view/user"
-	"github.com/go-playground/validator"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo-contrib/session"
@@ -28,55 +22,13 @@ import (
 
 const APPNAME = "eternal"
 
-type CustomValidator struct {
-	validator *validator.Validate
-}
-
-func (cv *CustomValidator) Validate(i interface{}) error {
-	return cv.validator.Struct(i)
-}
-
 func main() {
-	config.Init(APPNAME)
+	initConfig()
 	initLogging()
 	initDatabase()
 	initEvent()
 	filemanager.Init()
-	initEcho(func(e *echo.Echo) {
-		e.Validator = &CustomValidator{validator: validator.New()}
-
-		api := e.Group("/api")
-
-		// 登录注册
-		api.PUT("/account/token", accountView.Login)                       // 登录
-		api.POST("/account", accountView.Signup)                           // 注册
-		api.GET("/supported_countries", accountView.GetSupportedCountries) // 获取支持的国家列表
-		api.GET("/file/:id", fileView.DownloadFile)                        // 下载文件
-
-		authApi := api.Group("", cmiddleware.AuthMiddleware)
-		authApi.DELETE("/account/token", accountView.Logout) // 注销
-		authApi.GET("/account", accountView.GetAccountInfo)  // 获取账号信息
-		// 用户相关
-		authApi.GET("/user/profile", userView.GetUserProfile) // 获取用户信息
-		authApi.PUT("/user/cover", userView.UpdateUserCover)  // 更新用户的封面图
-		// 主页相关
-		authApi.GET("/home/hot/answers", homeView.GetHotAnswers) // 获取热门回答
-		// 回答相关
-		authApi.POST("/answer/:id/upvote", questionView.UpvoteAnswer)
-		authApi.POST("/answer/:id/downvote", questionView.DownvoteAnswer)
-		authApi.DELETE("/answer/:id/upvote", questionView.UndoUpvoteAnswer)
-		authApi.DELETE("/answer/:id/downvote", questionView.UndoDownvoteAnswer)
-		// 话题相关
-		authApi.GET("/topics", questionView.FindTopics)
-		// 问题相关
-		authApi.POST("/question", questionView.CreateQuestion)
-		authApi.GET("/questions", questionView.FindQuestions)
-		authApi.GET("/question/:id", questionView.GetQuestion)
-		authApi.GET("/question/:qid/answers", questionView.GetQuestionAnswers)
-
-		// 上传文件
-		authApi.POST("/file", fileView.UploadFile)
-	})
+	initEcho(controller.Register)
 }
 
 func errorHandler(err error, c echo.Context) {
@@ -87,6 +39,10 @@ func errorHandler(err error, c echo.Context) {
 	} else {
 		c.JSON(http.StatusInternalServerError, errors.NewError(0, -1, err.Error()))
 	}
+}
+
+func initConfig() {
+	config.Init(APPNAME)
 }
 
 /*
@@ -154,7 +110,7 @@ func initEcho(f func(*echo.Echo)) {
 	e.Use(middleware.RequestID())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     allowOrigins,
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, "Source"},
 		AllowCredentials: allowCredentials,
 		AllowMethods:     allowMethods,
 	}))
@@ -171,7 +127,7 @@ func initEcho(f func(*echo.Echo)) {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal(err)

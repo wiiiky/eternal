@@ -30,4 +30,4 @@ event:
     url: amqp://guest:guest@localhost:5672/
     exchange: eternal.exchange
     route_key: eternal.topic.#
-    consumer: eternal
+    consumer: eworker

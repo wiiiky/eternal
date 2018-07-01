@@ -4,7 +4,21 @@ CREATE DATABASE eternal WITH ENCODING='UTF8';
 \c eternal;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE supported_country(
+
+-- 客户端配置
+CREATE TABLE "client" (
+  id UUID NOT NULL PRIMARY KEY DEFAULT uuid_generate_v1mc(), -- 客户端ID
+  name VARCHAR(32) NOT NULL,						-- 客户端名称
+  token_max_age INTEGER NOT NULL,					-- 登录有效时长，单位秒
+  ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+INSERT INTO "client"(id, name, token_max_age)
+  VALUES('137ff912-7106-11e8-9430-bb0f063260f6', 'Web', 3600 * 24 * 15),
+  ('137ff913-7106-11e8-9430-bb9af99e7bb7', 'Android', 3600 * 24 * 365),
+  ('137ff914-7106-11e8-9430-e3546a325cfb','IOS', 3600 * 24 * 365);
+
+/* 注册帐号所支持的国家 */
+CREATE TABLE "supported_country"(
   code VARCHAR(8) NOT NULL PRIMARY KEY,
   name VARCHAR(64) NOT NULL,
   sort INT NOT NULL
@@ -16,7 +30,7 @@ INSERT INTO supported_country(code,name,sort) VALUES('86','中国',0),('1','美�
 -- 密码加密类型
 CREATE TYPE PasswordType AS enum('MD5','SHA1', 'SHA256');
 -- 账号
-CREATE TABLE account(
+CREATE TABLE "account"(
   id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
   country_code VARCHAR(8) NOT NULL DEFAULT '86',
   mobile VARCHAR(32) NOT NULL,
@@ -30,16 +44,19 @@ CREATE TABLE account(
 CREATE INDEX account__mobile ON account(mobile);
 
 -- Token
-CREATE TABLE token(
+CREATE TABLE "token"(
   id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
-  user_id UUID NOT NULL UNIQUE,
-  ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  user_id UUID NOT NULL,
+  client_id UUID NOT NULL,
+  ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE("user_id", "client_id")
 );
+CREATE INDEX token__user_id__client_id ON "token"(user_id, client_id);
 
 -- 性别
 CREATE TYPE GenderType AS enum('MALE', 'FEMALE' ,'');
 -- 用户信息
-CREATE TABLE user_profile(
+CREATE TABLE "user_profile"(
   user_id UUID PRIMARY KEY,
   name VARCHAR(32) NOT NULL DEFAULT '', -- '昵称'
   gender GenderType DEFAULT '', -- '性别'
@@ -52,7 +69,7 @@ CREATE TABLE user_profile(
 );
 
 /* 话题 */
-CREATE TABLE topic(
+CREATE TABLE "topic"(
   id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
   name VARCHAR(32) NOT NULL, -- 话题名
   icon VARCHAR(64) NOT NULL DEFAULT '', -- 图片ID
@@ -63,7 +80,7 @@ CREATE TABLE topic(
 CREATE INDEX topic__name ON topic(name);
 
 -- 问题
-CREATE TABLE question (
+CREATE TABLE "question" (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
   title VARCHAR(64) NOT NULL, -- 问题标题
   content TEXT NOT NULL DEFAULT '', -- 问题详细描述
@@ -73,14 +90,14 @@ CREATE TABLE question (
 );
 
 /* 问题和话题的关联表 */
-CREATE TABLE question_topic(
+CREATE TABLE "question_topic"(
   question_id UUID NOT NULL, -- 问题ID
   topic_id UUID NOT NULL, -- 话题ID
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY(question_id, topic_id)
 );
 
-CREATE TABLE answer (
+CREATE TABLE "answer" (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
   content TEXT NOT NULL, -- 回答正文
   excerpt TEXT NOT NULL, -- 回答摘录
@@ -97,7 +114,7 @@ CREATE INDEX answer__user_id ON answer(user_id);
 CREATE INDEX answer__upvote_count ON answer(upvote_count);
 CREATE INDEX answer__downvote_count ON answer(downvote_count);
 
-CREATE TABLE answer_upvote(
+CREATE TABLE "answer_upvote"(
   user_id UUID NOT NULL,
   answer_id UUID NOT NULL,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -105,7 +122,7 @@ CREATE TABLE answer_upvote(
 );
 CREATE INDEX answer_upvote__ctime ON answer_upvote(ctime);
 
-CREATE TABLE answer_downvote(
+CREATE TABLE "answer_downvote"(
   user_id UUID NOT NULL,
   answer_id UUID NOT NULL,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -113,7 +130,7 @@ CREATE TABLE answer_downvote(
 );
 CREATE INDEX answer_downvote__ctime ON answer_downvote(ctime);
 
-CREATE TABLE file(
+CREATE TABLE "file"(
   id VARCHAR(64) NOT NULL,
   content_type VARCHAR(128) NOT NULL, -- 文件类型
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -125,9 +142,9 @@ CREATE TABLE file(
  * 在一定时间内点赞数达到一定程度的回答
  * 使用定时任务计算热门回答
  */
-CREATE TABLE hot_answer(
+CREATE TABLE "hot_answer"(
 	id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
-	answer_id UUID PRIMARY KEY NOT NULL, -- 回答ID
+	answer_id UUID NOT NULL, -- 回答ID
 	question_id UUID NOT NULL, -- 所属问题
 	topic_id UUID NOT NULL, -- 所属话题,
 	ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

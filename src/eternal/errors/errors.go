@@ -7,6 +7,10 @@ import (
 
 /* 这里的错误全部都是对客户端的 */
 var (
+	ErrDB            = NewError(http.StatusInternalServerError, -1, "数据库错误")
+	ErrClientInvalid = NewError(http.StatusBadRequest, -2, "客户端未定义")
+
+	/* 用户相关 */
 	ErrUserNotFound              = NewError(http.StatusNotFound, 100, "用户不存在")
 	ErrUserPasswordInvalid       = NewError(http.StatusBadRequest, 101, "用户密码错误")
 	ErrUserPasswordLengthInvalid = NewError(http.StatusBadRequest, 102, "账号密码长度过短或过长")
