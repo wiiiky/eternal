@@ -121,7 +121,7 @@ func initEcho(f func(*echo.Echo)) {
 
 	go func() {
 		if err := e.Start(httpAddr); err != nil {
-			log.Info("shutting down the server")
+			log.Info("shutting down the server:", err)
 		}
 	}()
 	quit := make(chan os.Signal)
