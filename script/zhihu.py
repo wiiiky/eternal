@@ -118,9 +118,11 @@ for i in range(10):
         title = question['title']
         excerpt = question['excerpt']
         topics = []
-        actors = d['actors']
+        actors = d['uninterest_reasons']
         for actor in actors:
-            topic = get_topic(actor['id'])
+            if actor['object_type'] != 'topic':
+                continue
+            topic = get_topic(actor['object_token'])
             if not topic:
                 continue
             pk = save_topic(topic['name'], topic['introduction'])
