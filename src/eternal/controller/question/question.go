@@ -20,6 +20,7 @@ func GetQuestion(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, question)
 }
 
+/* 创建问题 */
 func CreateQuestion(c echo.Context) error {
 	ctx := c.(*context.Context)
 	data := CreateQuestionRequest{}
@@ -37,6 +38,33 @@ func CreateQuestion(c echo.Context) error {
 		return errors.ErrQuestionNotFound
 	}
 	return ctx.JSON(http.StatusOK, question)
+}
+
+/* 关注问题 */
+func FollowQuestion(c echo.Context) error {
+	ctx := c.(*context.Context)
+	questionID := ctx.Param("id")
+	
+	if followCount, err := questionModel.FollowQuestion(ctx.Account.ID, questionID); err != nil {
+		return err
+	} else {
+		return ctx.JSON(http.StatusOK, FollowQuestionResult{
+			FollowCount: followCount,
+		})
+	}
+}
+
+/* 取消关注 */
+func UnfollowQuestion(c echo.Context) error {
+	ctx := c.(*context.Context)
+	questionID := ctx.Param("id")
+	if followCount, err := questionModel.UnfollowQuestion(ctx.Account.ID, questionID); err != nil {
+		return err
+	} else {
+		return ctx.JSON(http.StatusOK, FollowQuestionResult{
+			FollowCount: followCount,
+		})
+	}
 }
 
 /* 搜索问题 */

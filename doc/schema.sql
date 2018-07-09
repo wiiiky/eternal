@@ -85,16 +85,25 @@ CREATE TABLE "question" (
   title VARCHAR(64) NOT NULL, -- 问题标题
   content TEXT NOT NULL DEFAULT '', -- 问题详细描述
   user_id UUID NOT NULL,
+  follow_count INTEGER NOT NULL DEFAULT 0, -- 关注数量
   utime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 /* 问题和话题的关联表 */
-CREATE TABLE "question_topic"(
+CREATE TABLE "question_topic" (
   question_id UUID NOT NULL, -- 问题ID
   topic_id UUID NOT NULL, -- 话题ID
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY(question_id, topic_id)
+);
+
+/* 关注问题 */
+CREATE TABLE "question_follow" (
+  question_id UUID NOT NULL, -- 问题ID
+  user_id UUID NOT NULL, -- 用户ID
+  ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(question_id, user_id)
 );
 
 CREATE TABLE "answer" (

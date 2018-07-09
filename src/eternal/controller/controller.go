@@ -50,6 +50,8 @@ func Register(e *echo.Echo) {
 	authApi.GET("/questions", question.FindQuestions)
 	authApi.GET("/question/:id", question.GetQuestion)
 	authApi.GET("/question/:qid/answers", question.GetQuestionAnswers)
+	authApi.POST("/question/:id/follow", question.FollowQuestion)
+	authApi.DELETE("/question/:id/follow", question.UnfollowQuestion)
 
 	// 上传文件
 	authApi.POST("/file", file.UploadFile)

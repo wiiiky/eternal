@@ -36,3 +36,7 @@ type QuestionWithTopAnswer struct {
 	TopAnswer              *questionModel.Answer                 `json:"answer"`
 	UserAnswerRelationship *questionModel.UserAnswerRelationship `json:"user_answer_relationship"`
 }
+
+type FollowQuestionResult struct {
+	FollowCount uint64 `json:"follow_count"`
+}

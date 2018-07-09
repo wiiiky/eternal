@@ -22,6 +22,7 @@ type Question struct {
 	UserID    string                    `sql:"user_id" json:"-"`
 	UTime     time.Time                 `sql:"utime,null" json:"utime"`
 	CTime     time.Time                 `sql:"ctime,null" json:"ctime"`
+	FollowCount uint64                   `sql:"follow_count" json:"follow_count"`
 	Topics    []*Topic                  `pg:"many2many:question_topic,fk:question_id,joinFK:topic_id" json:"topics"`
 	User      *accountModel.UserProfile `sql:"-" json:"user"`
 }
@@ -30,6 +31,13 @@ type QuestionTopic struct {
 	TableName  struct{}  `sql:"question_topic" json:"-"`
 	QuestionID string    `sql:"question_id,pk" json:"question_id"`
 	TopicID    string    `sql:"topic_id,pk" json:"topic_id"`
+	CTime      time.Time `sql:"ctime,null" json:"ctime"`
+}
+
+type QuestionFollow struct {
+	TableName struct{} `sql:"question_follow" json:"-"`
+	QuestionID string    `sql:"question_id,pk" json:"question_id"`
+	UserID string `sql:"user_id,pk" json:"user_id"`
 	CTime      time.Time `sql:"ctime,null" json:"ctime"`
 }
 
