@@ -1,9 +1,9 @@
 package middleware
 
 import (
+	clientCache "eternal/cache/client"
 	"eternal/controller/context"
 	"eternal/errors"
-	clientModel "eternal/model/client"
 	"github.com/labstack/echo"
 )
 
@@ -17,7 +17,7 @@ func SourceMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 				return errors.ErrClientInvalid
 			}
 		}
-		client, err := clientModel.GetClient(clientID)
+		client, err := clientCache.GetClient(clientID)
 		if err != nil {
 			return err
 		} else if client == nil {

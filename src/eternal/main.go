@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"eternal/cache/store"
 	"eternal/config"
 	"eternal/controller"
 	"eternal/errors"
@@ -26,6 +27,7 @@ func main() {
 	initConfig()
 	initLogging()
 	initDatabase()
+	initCache()
 	initEvent()
 	initFileManager()
 	initEcho(controller.Register)
@@ -75,6 +77,17 @@ func initDatabase() {
 	}
 	if err := db.Init(pgURL, mongoURL, mongoDBName); err != nil {
 		log.Fatal("Connecting database failed:", err)
+	}
+}
+
+/* 初始化缓存 */
+func initCache() {
+	redisURL := config.GetString("cache.redis.url")
+	if redisURL == "" {
+		log.Fatal("**CONFIG** cache.redis.url not found")
+	}
+	if err := store.InitRedis(redisURL); err != nil {
+		log.Fatal("InitRedis failed:", err)
 	}
 }
 

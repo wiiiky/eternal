@@ -24,6 +24,10 @@ database:
     url: mongodb://localhost
     dbname: eternal
 
+cache:
+  redis:
+    url: redis://localhost:6379/0
+
 filemanager:
   type: local
   local:
