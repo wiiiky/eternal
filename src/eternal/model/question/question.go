@@ -23,6 +23,29 @@ func GetQuestion(id string) (*Question, error) {
 	return &question, nil
 }
 
+/* 获取用户和回答的关系信息 */
+func GetUserQuestionRelationship(userID, questionID string) (*UserQuestionRelationship, error) {
+	conn := db.Conn()
+
+	userQuestionRelationship := &UserQuestionRelationship{
+		Followed: false,
+	}
+	questionFollow := QuestionFollow{
+		UserID:     userID,
+		QuestionID: questionID,
+	}
+	if err := conn.Select(&questionFollow); err != nil {
+		if err != pg.ErrNoRows {
+			log.Error("SQL Error:", err)
+			return nil, errors.ErrDB
+		}
+	} else {
+		userQuestionRelationship.Followed = true
+	}
+
+	return userQuestionRelationship, nil
+}
+
 /* 搜索问题 */
 func FindQuestions(query string, page, limit int) ([]*Question, error) {
 	conn := db.Conn()
@@ -90,7 +113,7 @@ func FollowQuestion(userID, questionID string) (uint64, error) {
 	}
 	defer tx.Rollback()
 
-	question := Question{ID:questionID}
+	question := Question{ID: questionID}
 	if err := tx.Select(&question); err != nil {
 		if err != pg.ErrNoRows {
 			log.Error("SQL Error:", err)
@@ -98,10 +121,10 @@ func FollowQuestion(userID, questionID string) (uint64, error) {
 		}
 		return 0, errors.ErrQuestionNotFound
 	}
-	
-	questionFollow := QuestionFollow {
+
+	questionFollow := QuestionFollow{
 		QuestionID: questionID,
-		UserID: userID,
+		UserID:     userID,
 	}
 	if err := tx.Select(&questionFollow); err != nil {
 		if err != pg.ErrNoRows {
@@ -121,7 +144,7 @@ func FollowQuestion(userID, questionID string) (uint64, error) {
 		log.Error("SQL Error:", err)
 		return 0, errors.ErrDB
 	}
-	
+
 	if err := tx.Commit(); err != nil {
 		log.Error("SQL Error:", err)
 		return 0, errors.ErrDB
@@ -139,9 +162,9 @@ func UnfollowQuestion(userID, questionID string) (uint64, error) {
 	}
 	defer tx.Rollback()
 
-	questionFollow := QuestionFollow {
+	questionFollow := QuestionFollow{
 		QuestionID: questionID,
-		UserID: userID,
+		UserID:     userID,
 	}
 	if err := tx.Select(&questionFollow); err != nil {
 		if err != pg.ErrNoRows {
@@ -154,7 +177,7 @@ func UnfollowQuestion(userID, questionID string) (uint64, error) {
 		log.Error("SQL Error:", err)
 		return 0, errors.ErrDB
 	}
-	
+
 	question := Question{
 		ID: questionID,
 	}

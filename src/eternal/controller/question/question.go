@@ -5,11 +5,13 @@ import (
 	"eternal/errors"
 	questionModel "eternal/model/question"
 	"github.com/labstack/echo"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
 /* 获取问题的详细信息 */
-func GetQuestion(ctx echo.Context) error {
+func GetQuestion(c echo.Context) error {
+	ctx := c.(*context.Context)
 	questionID := ctx.Param("id")
 	question, err := questionModel.GetQuestion(questionID)
 	if err != nil {
@@ -17,7 +19,15 @@ func GetQuestion(ctx echo.Context) error {
 	} else if question == nil {
 		return errors.ErrQuestionNotFound
 	}
-	return ctx.JSON(http.StatusOK, question)
+	userQuestionRelationship, err := questionModel.GetUserQuestionRelationship(ctx.Account.ID, questionID)
+	if err != nil {
+		log.Error("GetUserQuestionRelationship failed:", err)
+		return err
+	}
+	return ctx.JSON(http.StatusOK, QuestionResult{
+		Question:                 question,
+		UserQuestionRelationship: userQuestionRelationship,
+	})
 }
 
 /* 创建问题 */
@@ -44,17 +54,18 @@ func CreateQuestion(c echo.Context) error {
 func FollowQuestion(c echo.Context) error {
 	ctx := c.(*context.Context)
 	questionID := ctx.Param("id")
-	
+
 	if followCount, err := questionModel.FollowQuestion(ctx.Account.ID, questionID); err != nil {
 		return err
 	} else {
 		return ctx.JSON(http.StatusOK, FollowQuestionResult{
 			FollowCount: followCount,
+			Followed:    true,
 		})
 	}
 }
 
-/* 取消关注 */
+/* 取消关注问题 */
 func UnfollowQuestion(c echo.Context) error {
 	ctx := c.(*context.Context)
 	questionID := ctx.Param("id")
@@ -63,6 +74,7 @@ func UnfollowQuestion(c echo.Context) error {
 	} else {
 		return ctx.JSON(http.StatusOK, FollowQuestionResult{
 			FollowCount: followCount,
+			Followed:    false,
 		})
 	}
 }

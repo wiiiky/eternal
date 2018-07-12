@@ -15,16 +15,21 @@ type Topic struct {
 }
 
 type Question struct {
-	TableName struct{}                  `sql:"question" json:"-"`
-	ID        string                    `sql:"id" json:"id"`
-	Title     string                    `sql:"title" json:"title"`
-	Content   string                    `sql:"content" json:"content"`
-	UserID    string                    `sql:"user_id" json:"-"`
-	UTime     time.Time                 `sql:"utime,null" json:"utime"`
-	CTime     time.Time                 `sql:"ctime,null" json:"ctime"`
-	FollowCount uint64                   `sql:"follow_count" json:"follow_count"`
-	Topics    []*Topic                  `pg:"many2many:question_topic,fk:question_id,joinFK:topic_id" json:"topics"`
-	User      *accountModel.UserProfile `sql:"-" json:"user"`
+	TableName   struct{}                  `sql:"question" json:"-"`
+	ID          string                    `sql:"id" json:"id"`
+	Title       string                    `sql:"title" json:"title"`
+	Content     string                    `sql:"content" json:"content"`
+	UserID      string                    `sql:"user_id" json:"-"`
+	UTime       time.Time                 `sql:"utime,null" json:"utime"`
+	CTime       time.Time                 `sql:"ctime,null" json:"ctime"`
+	FollowCount uint64                    `sql:"follow_count" json:"follow_count"`
+	Topics      []*Topic                  `pg:"many2many:question_topic,fk:question_id,joinFK:topic_id" json:"topics"`
+	User        *accountModel.UserProfile `sql:"-" json:"user"`
+}
+
+// 用户和问题的关系，不对应具体的数据表
+type UserQuestionRelationship struct {
+	Followed bool `json:"followed"` // 已经关注
 }
 
 type QuestionTopic struct {
@@ -35,9 +40,9 @@ type QuestionTopic struct {
 }
 
 type QuestionFollow struct {
-	TableName struct{} `sql:"question_follow" json:"-"`
+	TableName  struct{}  `sql:"question_follow" json:"-"`
 	QuestionID string    `sql:"question_id,pk" json:"question_id"`
-	UserID string `sql:"user_id,pk" json:"user_id"`
+	UserID     string    `sql:"user_id,pk" json:"user_id"`
 	CTime      time.Time `sql:"ctime,null" json:"ctime"`
 }
 

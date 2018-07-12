@@ -3,7 +3,6 @@ package controller
 import (
 	"eternal/controller/account"
 	"eternal/controller/file"
-	"eternal/controller/home"
 	"eternal/controller/middleware"
 	"eternal/controller/question"
 	"eternal/controller/user"
@@ -37,8 +36,8 @@ func Register(e *echo.Echo) {
 	authApi.GET("/user/profile", user.GetUserProfile) // 获取用户信息
 	authApi.PUT("/user/cover", user.UpdateUserCover)  // 更新用户的封面图
 	// 主页相关
-	authApi.GET("/home/hot/answers", home.GetHotAnswers) // 获取热门回答
 	// 回答相关
+	authApi.GET("/hot/answers", question.GetHotAnswers) // 获取热门回答
 	authApi.POST("/answer/:id/upvote", question.UpvoteAnswer)
 	authApi.POST("/answer/:id/downvote", question.DownvoteAnswer)
 	authApi.DELETE("/answer/:id/upvote", question.UndoUpvoteAnswer)

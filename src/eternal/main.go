@@ -27,7 +27,7 @@ func main() {
 	initLogging()
 	initDatabase()
 	initEvent()
-	filemanager.Init()
+	initFileManager()
 	initEcho(controller.Register)
 }
 
@@ -57,6 +57,10 @@ func initLogging() {
 	logging.Init(format, level, output)
 }
 
+func initFileManager() {
+	filemanager.Init()
+}
+
 /* 初始化数据库 */
 func initDatabase() {
 	dbURL := config.GetString("database.url")
@@ -84,6 +88,7 @@ func initEvent() {
 	event.InitPub(amqpURL, amqpExchange, amqpRouteKey)
 }
 
+/* 初始化HTTP服务 */
 func initEcho(f func(*echo.Echo)) {
 	httpAddr := config.GetString("http.addr")
 	if httpAddr == "" {
@@ -117,6 +122,7 @@ func initEcho(f func(*echo.Echo)) {
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(sessionSecret))))
 	e.HTTPErrorHandler = errorHandler
 
+	/* 注册路由等 */
 	f(e)
 
 	go func() {

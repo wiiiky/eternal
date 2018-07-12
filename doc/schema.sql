@@ -14,8 +14,8 @@ CREATE TABLE "client" (
 );
 INSERT INTO "client"(id, name, token_max_age)
   VALUES('137ff912-7106-11e8-9430-bb0f063260f6', 'Web', 3600 * 24 * 15),
-  ('137ff913-7106-11e8-9430-bb9af99e7bb7', 'Android', 3600 * 24 * 365),
-  ('137ff914-7106-11e8-9430-e3546a325cfb','IOS', 3600 * 24 * 365);
+        ('137ff913-7106-11e8-9430-bb9af99e7bb7', 'Android', 3600 * 24 * 365),
+        ('137ff914-7106-11e8-9430-e3546a325cfb','IOS', 3600 * 24 * 365);
 
 /* 注册帐号所支持的国家 */
 CREATE TABLE "supported_country"(

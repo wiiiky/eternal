@@ -4,6 +4,16 @@ import (
 	questionModel "eternal/model/question"
 )
 
+type HotAnswerPageRequest struct {
+	Limit  int    `query:"limit" validate:"gte=1"`
+	Before string `query:"before"` // 时间点
+}
+
+type HotAnswer struct {
+	*questionModel.HotAnswer
+	UserAnswerRelationship *questionModel.UserAnswerRelationship `json:"user_answer_relationship"`
+}
+
 type VoteAnswerResult struct {
 	UpvoteCount   uint64 `json:"upvote_count"`
 	DownvoteCount uint64 `json:"downvote_count"`
@@ -26,7 +36,7 @@ type CreateQuestionRequest struct {
 	Content string   `json:"content" form:"content"`
 }
 
-type QuestionAnswerPageData struct {
+type QuestionAnswerPageRequest struct {
 	Limit int `query:"limit" validate:"gte=1"`
 	Page  int `query:"page" validate:"gte=1"`
 }
@@ -39,4 +49,10 @@ type QuestionWithTopAnswer struct {
 
 type FollowQuestionResult struct {
 	FollowCount uint64 `json:"follow_count"`
+	Followed    bool   `json:"followed"`
+}
+
+type QuestionResult struct {
+	*questionModel.Question
+	UserQuestionRelationship *questionModel.UserQuestionRelationship `json:"user_question_relationship"`
 }
