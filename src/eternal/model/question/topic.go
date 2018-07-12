@@ -6,7 +6,7 @@ import (
 )
 
 func FindTopics(query string, limit int) ([]*Topic, error) {
-	conn := db.Conn()
+	conn := db.PG()
 
 	topics := make([]*Topic, 0)
 	err := conn.Model(&topics).Where("name LIKE ?", "%"+query+"%").Limit(limit).Select()

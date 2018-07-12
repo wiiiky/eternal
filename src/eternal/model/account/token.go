@@ -8,7 +8,7 @@ import (
 )
 
 func UpsertToken(userID, clientID string) (*Token, error) {
-	conn := db.Conn()
+	conn := db.PG()
 
 	tk := &Token{
 		UserID:   userID,
@@ -27,7 +27,7 @@ func UpsertToken(userID, clientID string) (*Token, error) {
 }
 
 func DeleteToken(userID, clientID string) error {
-	conn := db.Conn()
+	conn := db.PG()
 	_, err := conn.Model((*Token)(nil)).Where("user_id = ?", userID).Where("client_id = ?", clientID).Delete()
 	if err != nil {
 		log.Error("SQL Error:", err)

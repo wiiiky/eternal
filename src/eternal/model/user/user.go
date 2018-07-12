@@ -3,18 +3,17 @@ package user
 import (
 	"eternal/model/account"
 	"eternal/model/db"
-	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 )
 
 func GetUserProfile(userID string) (*account.UserProfile, error) {
-	conn := db.Conn()
+	conn := db.PG()
 
 	up := &account.UserProfile{
 		UserID: userID,
 	}
 	err := conn.Select(up)
-	if err == pg.ErrNoRows {
+	if err == db.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
 		log.Error("SQL Error:", err)
@@ -24,7 +23,7 @@ func GetUserProfile(userID string) (*account.UserProfile, error) {
 }
 
 func UpdateUserCover(userID, cover string) (*account.UserProfile, error) {
-	conn := db.Conn()
+	conn := db.PG()
 
 	up := &account.UserProfile{
 		UserID: userID,

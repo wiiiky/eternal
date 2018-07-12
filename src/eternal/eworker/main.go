@@ -3,6 +3,8 @@ package main
 import (
 	"eternal/config"
 	"eternal/event"
+	"eternal/eworker/answer"
+	"eternal/eworker/sms"
 	"eternal/logging"
 	"eternal/model/db"
 	log "github.com/sirupsen/logrus"
@@ -16,8 +18,10 @@ func main() {
 	initLogging()
 	initDatabase()
 	initEvent()
-	event.Register(event.KeyAnswerUpvote, handleAnswerUpvote)
-	event.Register(event.KeyAnswerDownvote, handleAnswerDownvote)
+	initSMS()
+	event.Register(event.KeyAnswerUpvote, answer.HandleAnswerUpvote)
+	event.Register(event.KeyAnswerDownvote, answer.HandleAnswerDownvote)
+	event.Register(event.KeySMSSend, sms.HandleSMSSend)
 
 	ch := make(chan os.Signal)
 	<-ch
@@ -41,10 +45,22 @@ func initLogging() {
 }
 
 func initDatabase() {
-	dbURL := config.GetString("database.url")
-	if dbURL == "" {
-		log.Fatal("**CONFIG** database.url not found")
-	} else if err := db.Init(dbURL); err != nil {
+	pgURL := config.GetString("database.pg.url")
+	mongoURL := config.GetString("database.mongo.url")
+	mongoDBName := config.GetString("database.mongo.dbname")
+	if pgURL == "" {
+		log.Fatal("**CONFIG** database.pg.url not found")
+	} else if mongoURL == "" {
+		log.Fatal("**CONFIG** database.mongo.url not found")
+	} else if mongoDBName == "" {
+		log.Fatal("**CONFIG** database.mongo.dbname not found")
+	}
+	if err := db.Init(pgURL, mongoURL, mongoDBName); err != nil {
 		log.Fatal("Connecting database failed:", err)
 	}
+}
+
+func initSMS() {
+	keys := config.GetStringMapString("sms.keys")
+	sms.Init(keys)
 }

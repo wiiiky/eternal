@@ -7,7 +7,11 @@ log:
   output: stdout
 
 database:
-  url: postgres://postgres@127.0.0.1/eternal?sslmode=disable
+  pg:
+    url: postgres://postgres@127.0.0.1/eternal?sslmode=disable
+  mongo:
+    url: mongodb://localhost
+    dbname: eternal
 
 event:
   amqp:
@@ -15,3 +19,7 @@ event:
     exchange: eternal.exchange
     route_key: eternal.topic.#
     consumer: eworker
+
+sms:
+  keys:
+    signup: abcdefg

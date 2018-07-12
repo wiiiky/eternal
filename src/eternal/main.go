@@ -63,10 +63,17 @@ func initFileManager() {
 
 /* 初始化数据库 */
 func initDatabase() {
-	dbURL := config.GetString("database.url")
-	if dbURL == "" {
-		log.Fatal("**CONFIG** database.url not found")
-	} else if err := db.Init(dbURL); err != nil {
+	pgURL := config.GetString("database.pg.url")
+	mongoURL := config.GetString("database.mongo.url")
+	mongoDBName := config.GetString("database.mongo.dbname")
+	if pgURL == "" {
+		log.Fatal("**CONFIG** database.pg.url not found")
+	} else if mongoURL == "" {
+		log.Fatal("**CONFIG** database.mongo.url not found")
+	} else if mongoDBName == "" {
+		log.Fatal("**CONFIG** database.mongo.dbname not found")
+	}
+	if err := db.Init(pgURL, mongoURL, mongoDBName); err != nil {
 		log.Fatal("Connecting database failed:", err)
 	}
 }

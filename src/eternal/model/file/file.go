@@ -2,13 +2,12 @@ package file
 
 import (
 	"eternal/model/db"
-	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 )
 
 /* 保存文件 */
 func SaveFile(pk, contentType string) (*File, error) {
-	conn := db.Conn()
+	conn := db.PG()
 
 	f := &File{
 		ID:          pk,
@@ -23,14 +22,14 @@ func SaveFile(pk, contentType string) (*File, error) {
 }
 
 func GetFile(pk string) (*File, error) {
-	conn := db.Conn()
+	conn := db.PG()
 
 	f := &File{
 		ID: pk,
 	}
 
 	err := conn.Select(f)
-	if err == pg.ErrNoRows {
+	if err == db.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
 		log.Error("SQL Error:", err)

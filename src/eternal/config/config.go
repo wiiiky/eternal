@@ -4,6 +4,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+var DEBUG = true
+
 /*
  * 读取配置
  * https://github.com/spf13/viper
@@ -17,6 +19,7 @@ func Init(APPNAME string) {
 		panic(err)
 	}
 	viper.SetDefault("debug", true)
+	DEBUG = viper.GetBool("debug")
 }
 
 func GetString(key string) string {
@@ -48,6 +51,10 @@ func GetIntDefault(key string, def int) int {
 func GetStringSliceDefault(key string, def []string) []string {
 	viper.SetDefault(key, def)
 	return viper.GetStringSlice(key)
+}
+
+func GetStringMapString(key string) map[string]string {
+	return viper.GetStringMapString(key)
 }
 
 func GetBoolDefault(key string, def bool) bool {

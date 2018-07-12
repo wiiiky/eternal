@@ -3,18 +3,17 @@ package question
 import (
 	"eternal/errors"
 	"eternal/model/db"
-	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
 
 func GetAnswer(answerID string) (*Answer, error) {
-	conn := db.Conn()
+	conn := db.PG()
 	answer := Answer{
 		ID: answerID,
 	}
 	if err := conn.Select(&answer); err != nil {
-		if err == pg.ErrNoRows {
+		if err == db.ErrNoRows {
 			return nil, nil
 		}
 		log.Error("SQL Error:", err)
@@ -25,7 +24,7 @@ func GetAnswer(answerID string) (*Answer, error) {
 
 /* 获取用户和某个回答的关系 */
 func GetUserAnswerRelationship(userID, answerID string) (*UserAnswerRelationship, error) {
-	conn := db.Conn()
+	conn := db.PG()
 	relationship := &UserAnswerRelationship{}
 	upvote := AnswerUpvote{
 		UserID:   userID,
@@ -34,7 +33,7 @@ func GetUserAnswerRelationship(userID, answerID string) (*UserAnswerRelationship
 	if err := conn.Select(&upvote); err == nil {
 		relationship.Upvoted = true
 		return relationship, nil
-	} else if err != pg.ErrNoRows {
+	} else if err != db.ErrNoRows {
 		log.Error("SQL Error:", err)
 		return nil, err
 	}
@@ -44,7 +43,7 @@ func GetUserAnswerRelationship(userID, answerID string) (*UserAnswerRelationship
 	}
 	if err := conn.Select(&downvote); err == nil {
 		relationship.Downvoted = true
-	} else if err != pg.ErrNoRows {
+	} else if err != db.ErrNoRows {
 		log.Error("SQL Error:", err)
 		return nil, err
 	}
@@ -53,7 +52,7 @@ func GetUserAnswerRelationship(userID, answerID string) (*UserAnswerRelationship
 
 /* 获取问题下的回答 */
 func GetQuestionAnswers(userID, questionID string, page, limit int) ([]*Answer, error) {
-	conn := db.Conn()
+	conn := db.PG()
 	answers := make([]*Answer, 0)
 
 	err := conn.Model(&answers).Column("User").Where("question_id = ?", questionID).Order("upvote_count DESC").Offset((page - 1) * limit).Limit(limit).Select()
@@ -66,10 +65,10 @@ func GetQuestionAnswers(userID, questionID string, page, limit int) ([]*Answer, 
 
 /* 获取问题的最热门回答 */
 func GetQuestionTopAnswer(questionID string) (*Answer, error) {
-	conn := db.Conn()
+	conn := db.PG()
 	answer := Answer{}
 	err := conn.Model(&answer).Where("question_id = ?", questionID).Order("upvote_count DESC").Limit(1).Select()
-	if err == pg.ErrNoRows {
+	if err == db.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
 		log.Error("SQL Error:", err)
@@ -80,7 +79,7 @@ func GetQuestionTopAnswer(questionID string) (*Answer, error) {
 
 /* 获取热门回答 */
 func FindHotAnswers(userID string, before string, limit int) ([]*HotAnswer, error) {
-	conn := db.Conn()
+	conn := db.PG()
 	hotAnswers := make([]*HotAnswer, 0)
 
 	var beforeTime time.Time
@@ -107,7 +106,7 @@ func FindHotAnswers(userID string, before string, limit int) ([]*HotAnswer, erro
 
 /* 添加点赞，返回该回答的点赞数和踩数 */
 func UpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
-	conn := db.Conn()
+	conn := db.PG()
 	tx, err := conn.Begin()
 	if err != nil {
 		log.Error("SQL Error:", err)
@@ -119,7 +118,7 @@ func UpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 		ID: answerID,
 	}
 	if err := tx.Model(&answer).Column("id", "upvote_count", "downvote_count").WherePK().Select(); err != nil {
-		if err == pg.ErrNoRows {
+		if err == db.ErrNoRows {
 			return 0, 0, errors.ErrAnswerNotFound
 		}
 		log.Error("SQL Error:", err)
@@ -137,7 +136,7 @@ func UpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 
 	if err := tx.Select(&upvote); err == nil { /* “点赞“标签已经存在 */
 		return answer.UpvoteCount, answer.DownvoteCount, nil
-	} else if err != pg.ErrNoRows { /* 出错 */
+	} else if err != db.ErrNoRows { /* 出错 */
 		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
@@ -151,7 +150,7 @@ func UpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 			log.Error("SQL Error:", err)
 			return 0, 0, err
 		}
-	} else if err != pg.ErrNoRows { /* 出错 */
+	} else if err != db.ErrNoRows { /* 出错 */
 		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
@@ -175,7 +174,7 @@ func UpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 
 /* 取消点赞 */
 func UndoUpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
-	conn := db.Conn()
+	conn := db.PG()
 	tx, err := conn.Begin()
 	if err != nil {
 		log.Error("SQL Error:", err)
@@ -187,7 +186,7 @@ func UndoUpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 		ID: answerID,
 	}
 	if err := tx.Model(&answer).Column("id", "upvote_count", "downvote_count").WherePK().Select(); err != nil {
-		if err == pg.ErrNoRows {
+		if err == db.ErrNoRows {
 			return 0, 0, errors.ErrAnswerNotFound
 		}
 		log.Error("SQL Error:", err)
@@ -219,7 +218,7 @@ func UndoUpvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 
 /* 添加不喜欢 */
 func DownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
-	conn := db.Conn()
+	conn := db.PG()
 	tx, err := conn.Begin()
 	if err != nil {
 		log.Error("SQL Error:", err)
@@ -231,7 +230,7 @@ func DownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 		ID: answerID,
 	}
 	if err := tx.Model(&answer).Column("id", "upvote_count", "downvote_count").WherePK().Select(); err != nil {
-		if err == pg.ErrNoRows {
+		if err == db.ErrNoRows {
 			return 0, 0, errors.ErrAnswerNotFound
 		}
 		log.Error("SQL Error:", err)
@@ -249,7 +248,7 @@ func DownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 
 	if err := tx.Select(&downvote); err == nil { /* “踩“已经存在 */
 		return answer.UpvoteCount, answer.DownvoteCount, nil
-	} else if err != pg.ErrNoRows { /* 出错 */
+	} else if err != db.ErrNoRows { /* 出错 */
 		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
@@ -263,7 +262,7 @@ func DownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 			log.Error("SQL Error:", err)
 			return 0, 0, err
 		}
-	} else if err != pg.ErrNoRows { /* 出错 */
+	} else if err != db.ErrNoRows { /* 出错 */
 		log.Error("SQL Error:", err)
 		return 0, 0, err
 	}
@@ -287,7 +286,7 @@ func DownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 
 /* 取消踩 */
 func UndoDownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
-	conn := db.Conn()
+	conn := db.PG()
 	tx, err := conn.Begin()
 	if err != nil {
 		log.Error("SQL Error:", err)
@@ -299,7 +298,7 @@ func UndoDownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 		ID: answerID,
 	}
 	if err := tx.Model(&answer).Column("id", "upvote_count", "downvote_count").WherePK().Select(); err != nil {
-		if err == pg.ErrNoRows {
+		if err == db.ErrNoRows {
 			return 0, 0, errors.ErrAnswerNotFound
 		}
 		log.Error("SQL Error:", err)
@@ -331,7 +330,7 @@ func UndoDownvoteAnswer(userID, answerID string) (uint64, uint64, error) {
 
 /* 获取在指定时间内点赞次数 */
 func GetAnswerUpvoteCount(answerID string, startTime, endTime time.Time) (int, error) {
-	conn := db.Conn()
+	conn := db.PG()
 	count, err := conn.Model((*AnswerUpvote)(nil)).Where("answer_id = ? AND ctime > ? AND ctime < ?", answerID, startTime, endTime).CountEstimate(1000)
 	if err != nil {
 		log.Error("SQL Error:", err)
@@ -341,7 +340,7 @@ func GetAnswerUpvoteCount(answerID string, startTime, endTime time.Time) (int, e
 
 /* 获取在指定时间内的踩次数 */
 func GetAnswerDownvoteCount(answerID string, startTime, endTime time.Time) (int, error) {
-	conn := db.Conn()
+	conn := db.PG()
 	count, err := conn.Model((*AnswerDownvote)(nil)).Where("answer_id = ? AND ctime > ? AND ctime < ?", answerID, startTime, endTime).CountEstimate(1000)
 	if err != nil {
 		log.Error("SQL Error:", err)
@@ -351,7 +350,7 @@ func GetAnswerDownvoteCount(answerID string, startTime, endTime time.Time) (int,
 
 /* 添加或者更新热门回答 */
 func UpsertHotAnswer(answerID string) error {
-	conn := db.Conn()
+	conn := db.PG()
 	tx, err := conn.Begin()
 	if err != nil {
 		log.Error("SQL Error:", err)
@@ -363,7 +362,7 @@ func UpsertHotAnswer(answerID string) error {
 		ID: answerID,
 	}
 	if err := tx.Model(&answer).Column("Question", "Question.Topics").WherePK().Select(); err != nil {
-		if err != pg.ErrNoRows {
+		if err != db.ErrNoRows {
 			log.Error("SQL Error:", err)
 		}
 		return errors.ErrAnswerNotFound
@@ -382,7 +381,7 @@ func UpsertHotAnswer(answerID string) error {
 				log.Error("SQL Error:", err)
 				return err
 			}
-		} else if err == pg.ErrNoRows {
+		} else if err == db.ErrNoRows {
 			hotAnswer.AnswerID = answer.ID
 			hotAnswer.QuestionID = answer.Question.ID
 			hotAnswer.TopicID = topic.ID
@@ -404,7 +403,7 @@ func UpsertHotAnswer(answerID string) error {
 
 /* 删除热门回答 */
 func DeleteHotAnswer(answerID string) error {
-	conn := db.Conn()
+	conn := db.PG()
 
 	if _, err := conn.Model((*HotAnswer)(nil)).Where("answer_id = ?", answerID).Delete(); err != nil {
 		log.Error("SQL Error:", err)

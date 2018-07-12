@@ -4,12 +4,11 @@ import (
 	"eternal/errors"
 	"eternal/model/db"
 	"eternal/util"
-	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 )
 
 func GetSupportedCountries() ([]*SupportedCounty, error) {
-	conn := db.Conn()
+	conn := db.PG()
 
 	countries := make([]*SupportedCounty, 0)
 	err := conn.Model(&countries).Order(`sort ASC`).Select()
@@ -21,13 +20,13 @@ func GetSupportedCountries() ([]*SupportedCounty, error) {
 }
 
 func GetSupportedCountryWithCode(code string) (*SupportedCounty, error) {
-	conn := db.Conn()
+	conn := db.PG()
 	country := &SupportedCounty{
 		Code: code,
 	}
 
 	err := conn.Select(country)
-	if err == pg.ErrNoRows {
+	if err == db.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
 		log.Error("SQL Error:", err)
@@ -38,7 +37,7 @@ func GetSupportedCountryWithCode(code string) (*SupportedCounty, error) {
 
 /* 创建帐号 */
 func CreateAccount(countryCode, mobile, password, ptype string) (*Account, error) {
-	conn := db.Conn()
+	conn := db.PG()
 
 	tx, err := conn.Begin()
 	if err != nil {
@@ -52,7 +51,7 @@ func CreateAccount(countryCode, mobile, password, ptype string) (*Account, error
 	}
 	err = tx.Model(a).Where(`mobile=?`, mobile).Select()
 	if err != nil {
-		if err != pg.ErrNoRows {
+		if err != db.ErrNoRows {
 			return nil, err
 		}
 	} else { /* 查询成功，手机号已存在 */
@@ -91,11 +90,11 @@ func CreateAccount(countryCode, mobile, password, ptype string) (*Account, error
 }
 
 func GetAccountWithMobile(mobile string) (*Account, error) {
-	conn := db.Conn()
+	conn := db.PG()
 
 	a := &Account{}
 	err := conn.Model(a).Where("mobile = ?", mobile).Select()
-	if err == pg.ErrNoRows {
+	if err == db.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
 		log.Error("SQL Error: ", err)
@@ -105,11 +104,11 @@ func GetAccountWithMobile(mobile string) (*Account, error) {
 }
 
 func GetAccountWithUserID(userID string) (*Account, error) {
-	conn := db.Conn()
+	conn := db.PG()
 
 	a := &Account{}
 	err := conn.Model(a).Where("id = ?", userID).Select()
-	if err == pg.ErrNoRows {
+	if err == db.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
 		log.Error("SQL Error: ", err)
@@ -119,11 +118,11 @@ func GetAccountWithUserID(userID string) (*Account, error) {
 }
 
 func GetAccountWithTokenID(tokenID string) (*Account, error) {
-	conn := db.Conn()
+	conn := db.PG()
 
 	a := &Account{}
 	err := conn.Model(a).Join("JOIN token ON token.user_id=account.id").Where("token.id = ?", tokenID).Select()
-	if err == pg.ErrNoRows {
+	if err == db.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
 		log.Error("SQL Error: ", err)

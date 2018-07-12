@@ -3,18 +3,17 @@ package question
 import (
 	"eternal/errors"
 	"eternal/model/db"
-	"github.com/go-pg/pg"
 	log "github.com/sirupsen/logrus"
 )
 
 func GetQuestion(id string) (*Question, error) {
-	conn := db.Conn()
+	conn := db.PG()
 
 	question := Question{
 		ID: id,
 	}
 	err := conn.Model(&question).Column("question.*", "User", "Topics").WherePK().Select()
-	if err == pg.ErrNoRows {
+	if err == db.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
 		log.Error("SQL Error:", err)
@@ -25,7 +24,7 @@ func GetQuestion(id string) (*Question, error) {
 
 /* 获取用户和回答的关系信息 */
 func GetUserQuestionRelationship(userID, questionID string) (*UserQuestionRelationship, error) {
-	conn := db.Conn()
+	conn := db.PG()
 
 	userQuestionRelationship := &UserQuestionRelationship{
 		Followed: false,
@@ -35,7 +34,7 @@ func GetUserQuestionRelationship(userID, questionID string) (*UserQuestionRelati
 		QuestionID: questionID,
 	}
 	if err := conn.Select(&questionFollow); err != nil {
-		if err != pg.ErrNoRows {
+		if err != db.ErrNoRows {
 			log.Error("SQL Error:", err)
 			return nil, errors.ErrDB
 		}
@@ -48,7 +47,7 @@ func GetUserQuestionRelationship(userID, questionID string) (*UserQuestionRelati
 
 /* 搜索问题 */
 func FindQuestions(query string, page, limit int) ([]*Question, error) {
-	conn := db.Conn()
+	conn := db.PG()
 
 	questions := make([]*Question, 0)
 	if err := conn.Model(&questions).Where("title LIKE ?", "%"+query+"%").Offset((page - 1) * limit).Limit(limit).Order("ctime DESC").Select(); err != nil {
@@ -60,7 +59,7 @@ func FindQuestions(query string, page, limit int) ([]*Question, error) {
 
 /* 创建问题 */
 func CreateQuestion(userID, title string, topicIDs []string, content string) (*Question, error) {
-	tx, err := db.Conn().Begin()
+	tx, err := db.PG().Begin()
 	if err != nil {
 		log.Error("SQL Error:", err)
 		return nil, err
@@ -81,7 +80,7 @@ func CreateQuestion(userID, title string, topicIDs []string, content string) (*Q
 			ID: topicID,
 		}
 		if err := tx.Model(&topic).Column("id").WherePK().Select(); err != nil {
-			if err != pg.ErrNoRows {
+			if err != db.ErrNoRows {
 				log.Error("SQL Error:", err)
 				return nil, errors.ErrDB
 			}
@@ -106,7 +105,7 @@ func CreateQuestion(userID, title string, topicIDs []string, content string) (*Q
 
 /* 关注问题 */
 func FollowQuestion(userID, questionID string) (uint64, error) {
-	tx, err := db.Conn().Begin()
+	tx, err := db.PG().Begin()
 	if err != nil {
 		log.Error("SQL Error:", err)
 		return 0, errors.ErrDB
@@ -115,7 +114,7 @@ func FollowQuestion(userID, questionID string) (uint64, error) {
 
 	question := Question{ID: questionID}
 	if err := tx.Select(&question); err != nil {
-		if err != pg.ErrNoRows {
+		if err != db.ErrNoRows {
 			log.Error("SQL Error:", err)
 			return 0, errors.ErrDB
 		}
@@ -127,7 +126,7 @@ func FollowQuestion(userID, questionID string) (uint64, error) {
 		UserID:     userID,
 	}
 	if err := tx.Select(&questionFollow); err != nil {
-		if err != pg.ErrNoRows {
+		if err != db.ErrNoRows {
 			log.Error("SQL Error:", err)
 			return 0, errors.ErrDB
 		}
@@ -155,7 +154,7 @@ func FollowQuestion(userID, questionID string) (uint64, error) {
 
 /* 取消问题的关注 */
 func UnfollowQuestion(userID, questionID string) (uint64, error) {
-	tx, err := db.Conn().Begin()
+	tx, err := db.PG().Begin()
 	if err != nil {
 		log.Error("SQL Error:", err)
 		return 0, errors.ErrDB
@@ -167,7 +166,7 @@ func UnfollowQuestion(userID, questionID string) (uint64, error) {
 		UserID:     userID,
 	}
 	if err := tx.Select(&questionFollow); err != nil {
-		if err != pg.ErrNoRows {
+		if err != db.ErrNoRows {
 			log.Error("SQL Error:", err)
 			return 0, errors.ErrDB
 		}

@@ -69,7 +69,7 @@ func UpvoteAnswer(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	event.Publish(event.KeyAnswerUpvote, event.AnswerUpvote{
+	event.Publish(event.KeyAnswerUpvote, event.AnswerUpvoteData{
 		AnswerID: answerID,
 		UserID:   userID,
 	})
@@ -87,7 +87,7 @@ func UndoUpvoteAnswer(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	event.Publish(event.KeyAnswerDownvote, event.AnswerDownvote{
+	event.Publish(event.KeyAnswerDownvote, event.AnswerDownvoteData{
 		AnswerID: answerID,
 		UserID:   userID,
 	})
@@ -106,7 +106,7 @@ func DownvoteAnswer(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	event.Publish(event.KeyAnswerDownvote, event.AnswerDownvote{
+	event.Publish(event.KeyAnswerDownvote, event.AnswerDownvoteData{
 		AnswerID: answerID,
 		UserID:   userID,
 	})
@@ -124,7 +124,7 @@ func UndoDownvoteAnswer(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	event.Publish(event.KeyAnswerUpvote, event.AnswerUpvote{
+	event.Publish(event.KeyAnswerUpvote, event.AnswerUpvoteData{
 		AnswerID: answerID,
 		UserID:   userID,
 	})

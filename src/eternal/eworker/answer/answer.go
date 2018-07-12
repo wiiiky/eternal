@@ -1,4 +1,4 @@
-package main
+package answer
 
 import (
 	"encoding/json"
@@ -9,8 +9,8 @@ import (
 )
 
 /* 如果在一天内赞超过两次，则设置为热门回答 */
-func handleAnswerUpvote(routeKey string, body []byte) bool {
-	var data event.AnswerUpvote
+func HandleAnswerUpvote(routeKey string, body []byte) bool {
+	var data event.AnswerUpvoteData
 	if err := json.Unmarshal(body, &data); err != nil {
 		log.Error("json.Unmarshal failed:", err)
 		return false
@@ -33,8 +33,8 @@ func handleAnswerUpvote(routeKey string, body []byte) bool {
 	return false
 }
 
-func handleAnswerDownvote(routeKey string, body []byte) bool {
-	var data event.AnswerDownvote
+func HandleAnswerDownvote(routeKey string, body []byte) bool {
+	var data event.AnswerDownvoteData
 	if err := json.Unmarshal(body, &data); err != nil {
 		log.Error("json.Unmarshal failed:", err)
 		return false
