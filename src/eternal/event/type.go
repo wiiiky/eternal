@@ -17,7 +17,7 @@ type AnswerDownvoteData struct {
 }
 
 type SMSSendData struct {
-	PhoneNumber string                 `json:"phone_number"`
-	Vars        map[string]interface{} `json:"vars"`
-	Key         string                 `json:"key"`
+	PhoneNumber string            `json:"phone_number"`
+	Vars        map[string]string `json:"vars"`
+	Key         string            `json:"key"`
 }

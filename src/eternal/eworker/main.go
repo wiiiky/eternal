@@ -61,6 +61,13 @@ func initDatabase() {
 }
 
 func initSMS() {
+	appid := config.GetString("sms.appid")
+	appkey := config.GetString("sms.appkey")
+	if appid == "" {
+		log.Fatal("**CONFIG** sms.appid not found")
+	} else if appkey == "" {
+		log.Fatal("**CONFIG** sms.appkey not found")
+	}
 	keys := config.GetStringMapString("sms.keys")
-	sms.Init(keys)
+	sms.Init(appid, appkey, keys)
 }

@@ -25,5 +25,7 @@ event:
     consumer: eworker
 
 sms:
+  appid: "25111"
+  appkey: e7301278366ce50240c92f6f9687154a
   keys:
-    signup: abcdefg
+    signup: uF2r92
