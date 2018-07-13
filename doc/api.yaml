@@ -20,20 +20,20 @@ tags:
     description: 账号
   - name: file
     description: 文件
-  - name: home
-    description: 主页
   - name: question
     description: 问题
   - name: answer
     description: 回答
   - name: topic
     description: 话题
+  - name: misc
+    description: 杂项
 
 paths:
-  /home/hot/answers:
+  /hot/answers:
     get:
       tags:
-        - home
+        - question
       summary: 获取热门回答
       description: 获取热门回答
       operationId: findHotAnswers
@@ -162,6 +162,26 @@ paths:
       responses:
         '200':
           description: OK，Content-Type根据文件类型而定
+  /sms/signup:
+    post:
+      tags:
+        - misc
+      summary: 发送注册的验证码短信
+      description: 发送注册的验证码短信
+      operationId: sendSignupCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendSignupCodeRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendSignupCodeResult"
   /question:
     post:
       tags:
@@ -665,3 +685,23 @@ components:
         user_answer_relationship:
           type: object
           $ref: "#/components/schemas/UserAnswerRelationship"
+    SendSignupCodeRequest:
+      type: object
+      description: 发送注册短信验证码
+      properties:
+        phone_number:
+          type: string
+          description: 手机号码
+          example: 18621578815
+    SendSignupCodeResult:
+      type: object
+      description: 发送注册的验证码短信结果
+      properties:
+        sent:
+          type: boolean
+          description: 是否发送成功
+          example: true
+        wait:
+          type: integer
+          description: 重新发送的等待时长
+          example: 55

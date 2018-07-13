@@ -14,7 +14,7 @@ func GetSupportedCountries() ([]*SupportedCounty, error) {
 	err := conn.Model(&countries).Order(`sort ASC`).Select()
 	if err != nil {
 		log.Error("SQL Error:", err)
-		return nil, err
+		return nil, errors.ErrDB
 	}
 	return countries, nil
 }
@@ -30,32 +30,32 @@ func GetSupportedCountryWithCode(code string) (*SupportedCounty, error) {
 		return nil, nil
 	} else if err != nil {
 		log.Error("SQL Error:", err)
-		return nil, err
+		return nil, errors.ErrDB
 	}
 	return country, nil
 }
 
 /* 创建帐号 */
-func CreateAccount(countryCode, mobile, password, ptype string) (*Account, error) {
+func CreateAccount(countryCode, phoneNumber, password, ptype string) (*Account, error) {
 	conn := db.PG()
 
 	tx, err := conn.Begin()
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrDB
 	}
 	defer tx.Rollback()
 
 	a := &Account{
 		CountryCode: countryCode,
-		Mobile:      mobile,
+		PhoneNumber: phoneNumber,
 	}
-	err = tx.Model(a).Where(`mobile=?`, mobile).Select()
-	if err != nil {
+	if err := tx.Model(a).Where(`phone_number=?`, phoneNumber).Select(); err != nil {
 		if err != db.ErrNoRows {
-			return nil, err
+			log.Error("SQL Error:", err)
+			return nil, errors.ErrDB
 		}
 	} else { /* 查询成功，手机号已存在 */
-		return nil, errors.ErrMobileExisted
+		return nil, errors.ErrPhoneNumberExisted
 	}
 
 	salt, err := util.RandString(12)
@@ -85,15 +85,15 @@ func CreateAccount(countryCode, mobile, password, ptype string) (*Account, error
 		log.Error("SQL Commit failed:", err)
 		return nil, err
 	}
-	log.Infof("User %s:%s created", countryCode, mobile)
+	log.Infof("User %s:%s created", countryCode, phoneNumber)
 	return a, nil
 }
 
-func GetAccountWithMobile(mobile string) (*Account, error) {
+func GetAccountWithPhoneNumber(phoneNumber string) (*Account, error) {
 	conn := db.PG()
 
 	a := &Account{}
-	err := conn.Model(a).Where("mobile = ?", mobile).Select()
+	err := conn.Model(a).Where("phone_number = ?", phoneNumber).Select()
 	if err == db.ErrNoRows {
 		return nil, nil
 	} else if err != nil {

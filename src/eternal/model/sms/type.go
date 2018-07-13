@@ -13,7 +13,7 @@ const (
 /* 短信验证码状态 */
 const (
 	CodeStatusUnused = 0
-	StatusUsed       = 1
+	CodeStatusUsed   = 1
 )
 
 /* 短信验证码类型 */

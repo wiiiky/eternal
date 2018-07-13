@@ -33,15 +33,15 @@ CREATE TYPE PasswordType AS enum('MD5','SHA1', 'SHA256');
 CREATE TABLE "account"(
   id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
   country_code VARCHAR(8) NOT NULL DEFAULT '86',
-  mobile VARCHAR(32) NOT NULL,
+  phone_number VARCHAR(32) NOT NULL,
   salt VARCHAR(32) NOT NULL,
   passwd VARCHAR(256) NOT NULL,
   ptype PasswordType NOT NULL,
   utime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(mobile)
+  UNIQUE(phone_number)
 );
-CREATE INDEX account__mobile ON account(mobile);
+CREATE INDEX account__phone_number ON account(phone_number);
 
 -- Token
 CREATE TABLE "token"(

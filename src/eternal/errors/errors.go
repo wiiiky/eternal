@@ -15,7 +15,7 @@ var (
 	ErrUserPasswordInvalid       = NewError(http.StatusBadRequest, 101, "用户密码错误")
 	ErrUserPasswordLengthInvalid = NewError(http.StatusBadRequest, 102, "账号密码长度过短或过长")
 	ErrUseSMSCodeInvalid         = NewError(http.StatusBadRequest, 103, "短信验证码错误")
-	ErrMobileExisted             = NewError(http.StatusBadRequest, 104, "用户已存在")
+	ErrPhoneNumberExisted        = NewError(http.StatusBadRequest, 104, "手机号已存在")
 	ErrCountryCodeInvalid        = NewError(http.StatusBadRequest, 105, "国家不支持")
 
 	/* 11 MISC */

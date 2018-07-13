@@ -20,7 +20,7 @@ type Account struct {
 	TableName   struct{}  `sql:"account" json:"-"`
 	ID          string    `sql:"id" json:"id"`
 	CountryCode string    `sql:"country_code" json:"country_code"`
-	Mobile      string    `sql:"mobile" json:"mobile"`
+	PhoneNumber string    `sql:"phone_number" json:"phone_number"`
 	Salt        string    `sql:"salt" json:"-"`
 	Password    string    `sql:"passwd" json:"-"`
 	PType       string    `sql:"ptype" json:"-"`

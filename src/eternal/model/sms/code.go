@@ -32,6 +32,31 @@ func FindSMSCode(phoneNumber, codeType string, codeStatus int, d time.Duration) 
 	return &smsCode, nil
 }
 
+/* 检查短信验证码是否存在，如果存在且未使用，则设置为已使用 */
+func CheckSMSCode(phoneNumber, codeType, code string, d time.Duration) (bool, error) {
+	mc := db.MC(CollectionSMSCode)
+	smsCode := SMSCode{}
+	etime := time.Now().Add(-d)
+
+	query := bson.M{
+		"phone_number": phoneNumber,
+		"type":         codeType,
+		"status":       CodeStatusUnused,
+		"ctime": bson.M{
+			"$gt": etime,
+		},
+	}
+	if err := mc.Find(query).Sort("-ctime").One(&smsCode); err != nil {
+		if err != db.ErrNotFound {
+			log.Error("MGO Error:", err)
+			return false, errors.ErrDB
+		}
+		/* 未匹配 */
+		return false, nil
+	}
+	return true, UpdateSMSCodeStatus(smsCode.ID, CodeStatusUsed)
+}
+
 /* 获取指定IP在过去一段时间内的短信发送数量 */
 func CountSMSCodeByClientIP(clientIP, codeType string, d time.Duration) (int, error) {
 	mc := db.MC(CollectionSMSCode)
