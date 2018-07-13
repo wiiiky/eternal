@@ -18,6 +18,10 @@ var (
 	ErrMobileExisted             = NewError(http.StatusBadRequest, 104, "用户已存在")
 	ErrCountryCodeInvalid        = NewError(http.StatusBadRequest, 105, "国家不支持")
 
+	/* 11 MISC */
+	ErrSMSTooOften = NewError(http.StatusBadRequest, 1101, "短信发送太快")
+	ErrSMSTooMany  = NewError(http.StatusBadRequest, 1102, "短时间内发送过多")
+
 	/* 各种不存在 */
 	ErrFileNotFound     = NewError(http.StatusNotFound, 1001, "文件不存在")
 	ErrQuestionNotFound = NewError(http.StatusNotFound, 1002, "问题不存在")
@@ -25,12 +29,24 @@ var (
 	ErrAnswerNotFound   = NewError(http.StatusNotFound, 1004, "回答不存在")
 )
 
-func NewError(status, code int, msg interface{}) error {
+func NewError(status, code int, msg interface{}) *Error {
 	return &Error{
 		HttpStatus: status,
 		Code:       code,
 		Message:    fmt.Sprintf("%v", msg),
 	}
+}
+
+func CopyError(e *Error) *Error {
+	err := new(Error)
+	*err = *e
+	return err
+}
+
+func CopyErrorWithMsg(e *Error, msg string) *Error {
+	err := CopyError(e)
+	err.Message = msg
+	return err
 }
 
 type Error struct {

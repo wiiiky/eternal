@@ -7,6 +7,8 @@ import (
 var _mgo *mgo.Session = nil
 var _mdb *mgo.Database = nil
 
+var ErrNotFound = mgo.ErrNotFound
+
 /* 初始化MongoDB */
 func InitMongo(sURL, dbName string) error {
 	var err error

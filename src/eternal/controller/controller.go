@@ -4,6 +4,7 @@ import (
 	"eternal/controller/account"
 	"eternal/controller/file"
 	"eternal/controller/middleware"
+	"eternal/controller/misc"
 	"eternal/controller/question"
 	"eternal/controller/user"
 	"github.com/go-playground/validator"
@@ -28,6 +29,7 @@ func Register(e *echo.Echo) {
 	api.POST("/account", account.Signup)                           // 注册
 	api.GET("/supported_countries", account.GetSupportedCountries) // 获取支持的国家列表
 	api.GET("/file/:id", file.DownloadFile)                        // 下载文件
+	api.POST("/sms/signup", misc.SendSignupCode)                   // 发送注册短信
 
 	authApi := api.Group("", middleware.AuthMiddleware)
 	authApi.DELETE("/account/token", account.Logout) // 注销
@@ -35,7 +37,6 @@ func Register(e *echo.Echo) {
 	// 用户相关
 	authApi.GET("/user/profile", user.GetUserProfile) // 获取用户信息
 	authApi.PUT("/user/cover", user.UpdateUserCover)  // 更新用户的封面图
-	// 主页相关
 	// 回答相关
 	authApi.GET("/hot/answers", question.GetHotAnswers) // 获取热门回答
 	authApi.POST("/answer/:id/upvote", question.UpvoteAnswer)

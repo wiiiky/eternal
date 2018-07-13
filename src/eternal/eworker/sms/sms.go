@@ -32,10 +32,8 @@ func HandleSMSSend(routeKey string, body []byte) bool {
 	result, err := submail.XSend(data.PhoneNumber, template, data.Vars)
 	if err != nil {
 		log.Error("XSend failed:", err)
-		return false
 	} else if result.Status != submail.StatusSuccess {
 		log.Error("XSend result error:", result.Status, result.Msg)
-		return false
 	} else {
 		log.Info("XSend successfully:", data.PhoneNumber, data.Key)
 	}

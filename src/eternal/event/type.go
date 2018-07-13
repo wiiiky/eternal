@@ -16,6 +16,10 @@ type AnswerDownvoteData struct {
 	UserID   string `json:"user_id"`
 }
 
+const (
+	SMSKeySignup = "signup"
+)
+
 type SMSSendData struct {
 	PhoneNumber string            `json:"phone_number"`
 	Vars        map[string]string `json:"vars"`

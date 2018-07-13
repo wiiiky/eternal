@@ -3,7 +3,10 @@ package util
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"io"
+	mrand "math/rand"
+	"time"
 )
 
 func RandString(size int) (string, error) {
@@ -19,4 +22,9 @@ func RandString(size int) (string, error) {
 	}
 
 	return hex.EncodeToString(buf), nil
+}
+
+func RandDigit(size int) string {
+	rnd := mrand.New(mrand.NewSource(time.Now().UnixNano()))
+	return fmt.Sprintf("%06v", rnd.Int31n(1000000))
 }
