@@ -62,12 +62,12 @@ def new_user():
             pk = str(uuid.uuid4())
             mobile = str(random.randint(18600000000, 18621578815))
             cur.execute(
-                '''INSERT INTO account(id,country_code,mobile,salt,passwd,ptype) VALUES(%s,%s,%s,'','','MD5')''', (pk, '86', mobile))
+                '''INSERT INTO account(id,country_code,phone_number,salt,passwd,ptype) VALUES(%s,%s,%s,'','','MD5')''', (pk, '86', mobile))
             cur.execute(
                 '''INSERT INTO user_profile(user_id,description,name) VALUES(%s,%s,%s)''', (pk, '测试用户的简介', '测试用户'))
             return pk
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
 
 def save_topic(name, introduction):
