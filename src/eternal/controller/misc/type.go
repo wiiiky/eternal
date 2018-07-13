@@ -5,5 +5,6 @@ type SendSignupCodeRequest struct {
 }
 
 type SendSignupCodeResult struct {
-	Wait int `json:"wait"`
+	Sent bool `json:"sent"`
+	Wait int  `json:"wait"`
 }

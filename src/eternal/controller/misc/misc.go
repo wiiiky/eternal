@@ -33,6 +33,7 @@ func SendSignupCode(c echo.Context) error {
 		return err
 	} else if smsCode != nil {
 		return ctx.JSON(http.StatusOK, &SendSignupCodeResult{
+			Sent: false,
 			Wait: int(time.Minute/time.Second - time.Now().Sub(smsCode.CTime)/time.Second),
 		})
 	}
@@ -50,6 +51,7 @@ func SendSignupCode(c echo.Context) error {
 		},
 	})
 	return ctx.JSON(http.StatusOK, &SendSignupCodeResult{
+		Sent: true,
 		Wait: int(time.Minute / time.Second),
 	})
 }
