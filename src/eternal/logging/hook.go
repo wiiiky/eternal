@@ -13,7 +13,7 @@ func (hook ContextHook) Levels() []log.Level {
 }
 
 func (hook ContextHook) Fire(entry *log.Entry) error {
-	if pc, file, line, ok := runtime.Caller(9); ok {
+	if pc, file, line, ok := runtime.Caller(8); ok {
 		funcName := runtime.FuncForPC(pc).Name()
 
 		entry.Data["file"] = path.Base(file)

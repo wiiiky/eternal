@@ -33,7 +33,7 @@ paths:
   /hot/answers:
     get:
       tags:
-        - question
+        - answer
       summary: 获取热门回答
       description: 获取热门回答
       operationId: findHotAnswers
@@ -58,7 +58,6 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
                   $ref: "#/components/schemas/HotAnswer"
   /account:
     get:
@@ -242,7 +241,6 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
                   $ref: "#/components/schemas/QuestionWithTopAnswer"
   /answer/{id}/upvote:
     post:
@@ -374,7 +372,6 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
                   $ref: "#/components/schemas/Topic"
 
 components:
@@ -562,13 +559,10 @@ components:
       description: 热门回答
       properties:
         answer:
-          type: object
           $ref: "#/components/schemas/Answer"
         question:
-          type: object
           $ref: "#/components/schemas/Question"
         user_answer_relationship:
-          type: object
           $ref: "#/components/schemas/UserAnswerRelationship"
     VoteAnswerResult:
       type: object
@@ -648,7 +642,6 @@ components:
             $ref: "#/components/schemas/Topic"
           description: 话题列表
         user:
-          type: object
           $ref: "#/components/schemas/UserProfile"
         ctime:
           type: string
@@ -677,13 +670,10 @@ components:
       description: 问题已经问题相关的热门回答
       properties:
         question:
-          type: object
           $ref: "#/components/schemas/Question"
         answer:
-          type: object
           $ref: "#/components/schemas/Answer"
         user_answer_relationship:
-          type: object
           $ref: "#/components/schemas/UserAnswerRelationship"
     SendSignupCodeRequest:
       type: object
