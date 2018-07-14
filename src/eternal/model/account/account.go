@@ -19,7 +19,7 @@ func GetSupportedCountries() ([]*SupportedCounty, error) {
 	return countries, nil
 }
 
-func GetSupportedCountryWithCode(code string) (*SupportedCounty, error) {
+func GetSupportedCountryByCode(code string) (*SupportedCounty, error) {
 	conn := db.PG()
 	country := &SupportedCounty{
 		Code: code,
@@ -89,44 +89,31 @@ func CreateAccount(countryCode, phoneNumber, password, ptype string) (*Account, 
 	return a, nil
 }
 
-func GetAccountWithPhoneNumber(phoneNumber string) (*Account, error) {
+func GetAccount(accountID string) (*Account, error) {
 	conn := db.PG()
 
-	a := &Account{}
-	err := conn.Model(a).Where("phone_number = ?", phoneNumber).Select()
-	if err == db.ErrNoRows {
-		return nil, nil
-	} else if err != nil {
-		log.Error("SQL Error: ", err)
-		return nil, err
+	a := Account{
+		ID: accountID,
 	}
-	return a, err
+	if err := conn.Select(&a); err != nil {
+		if err != db.ErrNoRows {
+			log.Error("SQL Error:", err)
+			return nil, errors.ErrDB
+		}
+		return nil, nil
+	}
+	return &a, nil
 }
 
-func GetAccountWithUserID(userID string) (*Account, error) {
+func GetAccountByPhoneNumber(phoneNumber string) (*Account, error) {
 	conn := db.PG()
 
-	a := &Account{}
-	err := conn.Model(a).Where("id = ?", userID).Select()
-	if err == db.ErrNoRows {
-		return nil, nil
-	} else if err != nil {
-		log.Error("SQL Error: ", err)
-		return nil, err
+	a := Account{}
+	if err := conn.Model(&a).Where("phone_number = ?", phoneNumber).Select(); err != nil {
+		if err != db.ErrNoRows {
+			log.Error("SQL Error:", err)
+			return nil, errors.ErrDB
+		}
 	}
-	return a, err
-}
-
-func GetAccountWithTokenID(tokenID string) (*Account, error) {
-	conn := db.PG()
-
-	a := &Account{}
-	err := conn.Model(a).Join("JOIN token ON token.user_id=account.id").Where("token.id = ?", tokenID).Select()
-	if err == db.ErrNoRows {
-		return nil, nil
-	} else if err != nil {
-		log.Error("SQL Error: ", err)
-		return nil, err
-	}
-	return a, nil
+	return &a, nil
 }

@@ -38,6 +38,7 @@ type Token struct {
 	ID        string    `sql:"id" json:"id"`
 	UserID    string    `sql:"user_id" json:"user_id"`
 	ClientID  string    `sql:"client_id" json:"client_id"`
+	ETime     time.Time `sql:"etime" json:"etime"`
 	CTime     time.Time `sql:"ctime" json:"ctime"`
 }
 

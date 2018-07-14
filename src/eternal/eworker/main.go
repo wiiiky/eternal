@@ -9,12 +9,13 @@ import (
 	"eternal/model/db"
 	log "github.com/sirupsen/logrus"
 	"os"
+	"os/signal"
 )
 
 const APPNAME = "eworker"
 
 func main() {
-	config.Init(APPNAME)
+	initConfig()
 	initLogging()
 	initDatabase()
 	initEvent()
@@ -23,8 +24,13 @@ func main() {
 	event.Register(event.KeyAnswerDownvote, answer.HandleAnswerDownvote)
 	event.Register(event.KeySMSSend, sms.HandleSMSSend)
 
-	ch := make(chan os.Signal)
-	<-ch
+	quit := make(chan os.Signal)
+	signal.Notify(quit, os.Interrupt, os.Kill)
+	<-quit
+}
+
+func initConfig() {
+	config.Init(APPNAME)
 }
 
 func initEvent() {
@@ -60,6 +66,7 @@ func initDatabase() {
 	}
 }
 
+/* 初始化短信服务 */
 func initSMS() {
 	appid := config.GetString("sms.appid")
 	appkey := config.GetString("sms.appkey")

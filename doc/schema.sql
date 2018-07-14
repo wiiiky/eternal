@@ -48,6 +48,7 @@ CREATE TABLE "token"(
   id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
   user_id UUID NOT NULL,
   client_id UUID NOT NULL,
+  etime TIMESTAMP WITH TIME ZONE,
   ctime TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   UNIQUE("user_id", "client_id")
 );

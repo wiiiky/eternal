@@ -151,7 +151,7 @@ func initEcho(f func(*echo.Echo)) {
 		}
 	}()
 	quit := make(chan os.Signal)
-	signal.Notify(quit, os.Interrupt)
+	signal.Notify(quit, os.Interrupt, os.Kill)
 	<-quit
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

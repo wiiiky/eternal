@@ -23,7 +23,11 @@ func GetSupportedCountries(ctx echo.Context) error {
 }
 
 func login(ctx *context.Context, a *accountModel.Account) error {
-	tk, err := accountModel.UpsertToken(a.ID, ctx.Client.ID)
+	client := ctx.Client
+	maxAge := client.TokenMaxAge // 单位秒
+
+	/* 更新Token */
+	tk, err := accountModel.UpsertToken(a.ID, ctx.Client.ID, time.Second*time.Duration(maxAge))
 	if err != nil {
 		return err
 	}
@@ -31,7 +35,7 @@ func login(ctx *context.Context, a *accountModel.Account) error {
 	sess, _ := session.Get("session", ctx)
 	sess.Options = &sessions.Options{
 		Path:   "/",
-		MaxAge: 86400 * 7,
+		MaxAge: int(maxAge),
 	}
 	sess.Values["token"] = tk.ID
 	sess.Save(ctx.Request(), ctx.Response())
@@ -50,7 +54,7 @@ func Login(c echo.Context) error {
 	phoneNumber := data.PhoneNumber
 	password := data.Password
 
-	a, err := accountModel.GetAccountWithPhoneNumber(phoneNumber)
+	a, err := accountModel.GetAccountByPhoneNumber(phoneNumber)
 	if err != nil {
 		return err
 	} else if a == nil { /* 用户不存在 */
@@ -95,7 +99,7 @@ func Signup(c echo.Context) error {
 		return errors.ErrUserPasswordLengthInvalid
 	}
 
-	country, err := accountModel.GetSupportedCountryWithCode(countryCode)
+	country, err := accountModel.GetSupportedCountryByCode(countryCode)
 	if err != nil {
 		return err
 	} else if country == nil {

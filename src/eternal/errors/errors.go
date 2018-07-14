@@ -17,6 +17,7 @@ var (
 	ErrUseSMSCodeInvalid         = NewError(http.StatusBadRequest, 103, "短信验证码错误")
 	ErrPhoneNumberExisted        = NewError(http.StatusBadRequest, 104, "手机号已存在")
 	ErrCountryCodeInvalid        = NewError(http.StatusBadRequest, 105, "国家不支持")
+	ErrTokenExpired              = NewError(http.StatusForbidden, 106, "token过期")
 
 	/* 11 MISC */
 	ErrSMSTooOften = NewError(http.StatusBadRequest, 1101, "短信发送太快")
