@@ -1,6 +1,7 @@
 package account
 
 import (
+	accountCache "eternal/cache/account"
 	"eternal/controller/context"
 	"eternal/errors"
 	accountModel "eternal/model/account"
@@ -71,7 +72,7 @@ func Login(c echo.Context) error {
 func Logout(c echo.Context) error {
 	ctx := c.(*context.Context)
 
-	if err := accountModel.DeleteToken(ctx.Account.ID, ctx.Client.ID); err != nil {
+	if err := accountCache.DeleteToken(ctx.Token.ID); err != nil {
 		return err
 	}
 

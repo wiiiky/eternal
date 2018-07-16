@@ -9,14 +9,16 @@ import (
 func GetClient(clientID string) (*clientModel.Client, error) {
 	var err error
 	client := new(clientModel.Client)
-	if ok, _ := store.HGetVal(KeyClient, clientID, client); ok {
+
+	key := getClientKey(clientID)
+	if ok, _ := store.GetVal(key, client); ok {
 		return client, nil
 	}
 	if client, err = clientModel.GetClient(clientID); err != nil {
 		return nil, err
 	}
-	if err := store.HSetVal(KeyClient, client.ID, client); err != nil {
+	if err = store.SetVal(key, client, 0); err != nil {
 		log.Error("HSet failed:", err)
 	}
-	return client, err
+	return client, nil
 }

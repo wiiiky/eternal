@@ -46,9 +46,9 @@ func UpsertToken(userID, clientID string, expire time.Duration) (*Token, error) 
 	return &tk, nil
 }
 
-func DeleteToken(userID, clientID string) error {
+func DeleteToken(tokenID string) error {
 	conn := db.PG()
-	_, err := conn.Model((*Token)(nil)).Where("user_id = ?", userID).Where("client_id = ?", clientID).Delete()
+	_, err := conn.Model((*Token)(nil)).Where("id = ?", tokenID).Delete()
 	if err != nil {
 		log.Error("SQL Error:", err)
 		return errors.ErrDB

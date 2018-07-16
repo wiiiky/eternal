@@ -21,13 +21,14 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return err
 		} else if token == nil {
 			return c.NoContent(http.StatusUnauthorized)
-		} else if token.ETime.Before(time.Now()) { /* TOKEN已过期 */
+		} else if !token.ETime.IsZero() && token.ETime.Before(time.Now()) { /* TOKEN已过期 */
 			return errors.ErrTokenExpired
 		}
 		account, _ := accountCache.GetAccount(token.UserID)
 		if account == nil {
 			return c.NoContent(http.StatusUnauthorized)
 		}
+		ctx.Token = token
 		ctx.Account = account
 		return next(ctx)
 	}

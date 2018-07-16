@@ -6,17 +6,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func GetAccount(accountID string) (*accountModel.Account, error) {
+func GetAccount(userID string) (*accountModel.Account, error) {
 	var err error
 	account := new(accountModel.Account)
-	if ok, _ := store.HGetVal(KeyAccount, accountID, account); ok {
+
+	key := getAccountKey(userID)
+	if ok, _ := store.GetVal(key, account); ok {
 		return account, nil
 	}
-	if account, err = accountModel.GetAccount(accountID); err != nil {
+	if account, err = accountModel.GetAccount(userID); err != nil {
 		return nil, err
 	}
-	if err := store.HSetVal(KeyAccount, account.ID, account); err != nil {
+	if err = store.SetVal(key, account, 0); err != nil {
 		log.Error("HSet failed:", err)
 	}
-	return account, err
+	return account, nil
 }

@@ -8,6 +8,7 @@ import (
 
 type Context struct {
 	echo.Context
+	Token   *accountModel.Token
 	Client  *clientModel.Client
 	Account *accountModel.Account
 }

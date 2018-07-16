@@ -59,3 +59,7 @@ func HGetVal(k, f string, v interface{}) (bool, error) {
 	}
 	return true, nil
 }
+
+func Del(keys ...string) error {
+	return _redis.Del(keys...).Err()
+}
