@@ -141,6 +141,7 @@ func initEcho(f func(*echo.Echo)) {
 	}))
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(sessionSecret))))
 	e.HTTPErrorHandler = errorHandler
+	e.HideBanner = true
 
 	/* 注册路由等 */
 	f(e)

@@ -1,8 +1,8 @@
 package account
 
 const (
-	KeyAccount = "account"
-	KeyToken   = "token"
+	KeyAccount = "eternal.account"
+	KeyToken   = "eternal.token"
 )
 
 func getTokenKey(tokenID string) string {

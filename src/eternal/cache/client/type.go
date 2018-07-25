@@ -1,7 +1,7 @@
 package client
 
 const (
-	KeyClient = "client"
+	KeyClient = "eternal.client"
 )
 
 func getClientKey(clientID string) string {

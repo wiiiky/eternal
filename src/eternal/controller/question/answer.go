@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"sync"
 )
 
 /* 获取热门回答 */
@@ -28,14 +29,22 @@ func GetHotAnswers(c echo.Context) error {
 		return err
 	}
 	results := make([]*HotAnswer, 0)
-	for _, hotAnswer := range hotAnswers {
-		relationship, err := questionModel.GetUserAnswerRelationship(userID, hotAnswer.Answer.ID)
-		if err != nil {
-			log.Error("GetUserAnswerRelationship failed:", err)
-			return err
-		}
-		results = append(results, &HotAnswer{HotAnswer: hotAnswer, UserAnswerRelationship: relationship})
+	var wg sync.WaitGroup
+	var mutex sync.Mutex
+	for _, ha := range hotAnswers {
+		wg.Add(1)
+		go func(hotAnswer *questionModel.HotAnswer) {
+			defer wg.Done()
+			relationship, err := questionModel.GetUserAnswerRelationship(userID, hotAnswer.Answer.ID)
+			if err != nil {
+				log.Error("GetUserAnswerRelationship failed:", err)
+			}
+			defer mutex.Unlock()
+			mutex.Lock()
+			results = append(results, &HotAnswer{HotAnswer: hotAnswer, UserAnswerRelationship: relationship})
+		}(ha)
 	}
+	wg.Wait()
 	return ctx.JSON(http.StatusOK, results)
 }
 
