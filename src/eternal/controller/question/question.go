@@ -4,10 +4,10 @@ import (
 	"eternal/controller/context"
 	"eternal/errors"
 	questionModel "eternal/model/question"
+	"eternal/util"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 	"net/http"
-	"sync"
 )
 
 /* 获取问题的详细信息 */
@@ -98,34 +98,25 @@ func FindQuestions(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	results := make([]*QuestionWithTopAnswer, 0)
-	var wg sync.WaitGroup
-	var mutex sync.Mutex
-	for _, q := range questions {
+	results := util.GoAsyncSlice(questions, func(d interface{}) interface{} {
 		/* 并发获取问题的热门回答，以及用户和回答的关系 */
-		wg.Add(1)
-		go func(question *questionModel.Question) {
-			defer wg.Done()
-			topAnswer, err := questionModel.GetQuestionTopAnswer(question.ID)
+		question := d.(*questionModel.Question)
+		topAnswer, err := questionModel.GetQuestionTopAnswer(question.ID)
+		if err != nil {
+			log.Error("GetQuestionTopAnswer failed:", err)
+		}
+		var relationship *questionModel.UserAnswerRelationship
+		if topAnswer != nil {
+			relationship, err = questionModel.GetUserAnswerRelationship(userID, topAnswer.ID)
 			if err != nil {
-				log.Error("GetQuestionTopAnswer failed:", err)
+				log.Error("GetUserAnswerRelationship failed:", err)
 			}
-			var relationship *questionModel.UserAnswerRelationship
-			if topAnswer != nil {
-				relationship, err = questionModel.GetUserAnswerRelationship(userID, topAnswer.ID)
-				if err != nil {
-					log.Error("GetUserAnswerRelationship failed:", err)
-				}
-			}
-			defer mutex.Unlock()
-			mutex.Lock()
-			results = append(results, &QuestionWithTopAnswer{
-				Question:               question,
-				TopAnswer:              topAnswer,
-				UserAnswerRelationship: relationship,
-			})
-		}(q)
-	}
-	wg.Wait()
+		}
+		return &QuestionWithTopAnswer{
+			Question:               question,
+			TopAnswer:              topAnswer,
+			UserAnswerRelationship: relationship,
+		}
+	})
 	return ctx.JSON(http.StatusOK, results)
 }

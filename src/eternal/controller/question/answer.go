@@ -4,10 +4,11 @@ import (
 	"eternal/controller/context"
 	"eternal/event"
 	questionModel "eternal/model/question"
+	"eternal/util"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 	"net/http"
-	"sync"
+	//"sync"
 )
 
 /* 获取热门回答 */
@@ -28,23 +29,14 @@ func GetHotAnswers(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	results := make([]*HotAnswer, 0)
-	var wg sync.WaitGroup
-	var mutex sync.Mutex
-	for _, ha := range hotAnswers {
-		wg.Add(1)
-		go func(hotAnswer *questionModel.HotAnswer) {
-			defer wg.Done()
-			relationship, err := questionModel.GetUserAnswerRelationship(userID, hotAnswer.Answer.ID)
-			if err != nil {
-				log.Error("GetUserAnswerRelationship failed:", err)
-			}
-			defer mutex.Unlock()
-			mutex.Lock()
-			results = append(results, &HotAnswer{HotAnswer: hotAnswer, UserAnswerRelationship: relationship})
-		}(ha)
-	}
-	wg.Wait()
+	results := util.GoAsyncSlice(hotAnswers, func(d interface{}) interface{} {
+		hotAnswer := d.(*questionModel.HotAnswer)
+		relationship, err := questionModel.GetUserAnswerRelationship(userID, hotAnswer.Answer.ID)
+		if err != nil {
+			log.Error("GetUserAnswerRelationship failed:", err)
+		}
+		return &HotAnswer{HotAnswer: hotAnswer, UserAnswerRelationship: relationship}
+	})
 	return ctx.JSON(http.StatusOK, results)
 }
 
